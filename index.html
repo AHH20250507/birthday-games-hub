@@ -1191,16 +1191,26 @@ function scheduleSync(){
 function syncPush(){
   if(!syncOn() || syncing) return;
   syncing=true; setDot('ing');
-  var payload=Object.assign({}, state); delete payload.sync;
-  payload._ts=Date.now(); state._ts=payload._ts;
-  var body={message:'sync '+new Date().toISOString(), content:b64e(JSON.stringify(payload)), branch:'main'};
-  fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {method:'GET', headers:ghHeaders()})
-  .then(function(r){ return r.json(); })
-  .then(function(old){ if(old && old.sha) body.sha=old.sha;
-    return fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {method:'PUT', headers:ghHeaders(), body:JSON.stringify(body)});
+  fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {headers:ghHeaders()})
+  .then(function(r){ return (r.ok||r.status===404)? r.json() : null; })
+  .then(function(old){
+    var remoteSha=null, remoteTs=0;
+    if(old && old.content){
+      try{ remoteTs=(JSON.parse(b64d(old.content))._ts)||0; }catch(e){}
+      remoteSha=old.sha;
+    }
+    if(remoteTs > (state._ts||0)){
+      /* 云端比本机新：本机可能是还没同步过的新设备，禁止推送覆盖云端，改为拉取 */
+      return syncPull().then(function(){ state.sync.lastSync=Date.now(); rawSave(); });
+    }
+    var payload=Object.assign({}, state); delete payload.sync;
+    payload._ts=Date.now(); state._ts=payload._ts;
+    var body={message:'sync '+new Date().toISOString(), content:b64e(JSON.stringify(payload)), branch:'main'};
+    if(remoteSha) body.sha=remoteSha;
+    return fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {method:'PUT', headers:ghHeaders(), body:JSON.stringify(body)})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); state.sync.lastSync=Date.now(); rawSave(); });
   })
-  .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-  .then(function(){ syncing=false; state.sync.lastSync=Date.now(); rawSave(); setDot('ok'); })
+  .then(function(){ syncing=false; setDot('ok'); })
   .catch(function(){ syncing=false; setDot('err'); });
 }
 function syncPull(then){
