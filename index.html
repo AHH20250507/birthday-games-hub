@@ -321,9 +321,8 @@ var CATS = ['破冰暖场','分组对抗','爆笑整蛊','协作挑战','温情�
 var GAMES = [];
 
 var KEY = 'bgh_v1';
-var SYNC_REPO = 'AHH20250507/bgh-sync-data';
 var AI_DEF = {url:'https://ai666.live/v1', key:'sk-FcfEByqfiggSPxsN9BfRnqNmrHCQpVn33kRf3zLkVC9ekjA6', model:'gpt-5.6-sol'};
-var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',who:'',date:'',people:'',items:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model}, sync:{token:'', lastSync:0}, _ts:0};
+var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',who:'',date:'',people:'',items:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model}, sync:{code:'', lastSync:0}, _ts:0};
 function rawSave(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 function save(){ state._ts=Date.now(); rawSave(); scheduleSync(); }
 function load(){
@@ -337,7 +336,7 @@ function load(){
     if(r.hidden) state.hidden = r.hidden;
     if(r.cur) state.cur = Object.assign(state.cur, r.cur);
     if(r.ai) state.ai = Object.assign({}, state.ai, r.ai);
-    if(r.sync) state.sync = Object.assign(state.sync, {token:r.sync.token||'', lastSync:r.sync.lastSync||0});
+    if(r.sync) state.sync = {code:r.sync.code||'', lastSync:r.sync.lastSync||0};
     if(r._ts) state._ts = r._ts;
   }catch(e){}
 }
@@ -954,8 +953,8 @@ function openSettings(){
   h+='<div class="efield efull"><label>模型名称</label><input class="field" id="s_model" value="'+esc(a.model)+'" placeholder="gpt-5.6-sol"></div>';
   h+='</div></div>';
   h+='<div class="msection"><h3>多设备同步</h3>';
-  h+='<div class="efield efull"><label>GitHub Token（只需本机保存，不会进入网页源码）</label><input class="field" id="s_token" type="password" autocomplete="off" value="'+esc(state.sync.token)+'" placeholder="ghp_..."></div>';
-  h+='<div class="ehint">填入有 repo 权限的 token 并保存后，本机数据自动同步到你的私有仓库 '+SYNC_REPO+'，其他设备打开本页后在设置里填同一个 token 即可拿到全部数据。修改后约 1.5 秒自动上传，每 30 秒自动拉取。</div></div>';
+  h+='<div class="efield efull"><label>同步码（自定义短码，所有设备填同一个即可互通）</label><input class="field" id="s_code" autocomplete="off" value="'+esc(state.sync.code)+'" placeholder="例如：lyi-2026"></div>';
+  h+='<div class="ehint">设置同步码并保存后，数据自动同步到腾讯云专属数据库（独立集合，不影响环境里其他项目）。修改约 1.5 秒自动上传，每 30 秒自动拉取。新设备打开本页，在设置里填同一个同步码即可拿到全部数据。</div></div>';
   h+='<div class="mafoot"><button class="btn primary" id="s_save">保存</button><button class="btn" id="s_test">测试连接</button><button class="btn" id="s_sync">立即同步</button><span id="s_result" style="font-size:14px;color:var(--muted);align-self:center"></span></div></div>';
   var m=$('#modal'); m.innerHTML=h; m.hidden=false; document.body.style.overflow='hidden';
 }
@@ -963,7 +962,7 @@ function readAISettings(){
   state.ai.url=$('#s_url').value.trim()||AI_DEF.url;
   state.ai.key=$('#s_key').value.trim();
   state.ai.model=$('#s_model').value.trim()||AI_DEF.model;
-  if($('#s_token')) state.sync.token=$('#s_token').value.trim();
+  if($('#s_code')) state.sync.code=$('#s_code').value.trim();
 }
 function aiBase(){ return state.ai.url.replace(/\/+$/,'')+'/chat/completions'; }
 function aiErrText(err){
@@ -1170,11 +1169,9 @@ function doGenerate(text, extraUrls){
   });
 }
 
-/* ---------- 云端同步（GitHub 私有仓库） ---------- */
-function b64e(s){ return btoa(unescape(encodeURIComponent(s))); }
-function b64d(s){ try{ return decodeURIComponent(escape(atob(s))); }catch(e){ return ''; } }
-function syncOn(){ return !!(state.sync && state.sync.token); }
-function ghHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+state.sync.token,'Accept':'application/vnd.github+json'}; }
+/* ---------- 云端同步（腾讯云 CloudBase · 独立集合 bgh_sync + 独立云函数 bghsync） ---------- */
+var SYNC_API='https://openxin-d4g2wm7v431a4bbbf-1458194381.ap-shanghai.app.tcloudbase.com/bghsync';
+function syncOn(){ return !!(state.sync && state.sync.code); }
 function setDot(mode){
   var d=$('#syncDot'); if(!d) return;
   var m={off:['#c7c7cc','同步未配置'],ok:['#34c759','已同步到云端'],ing:['#ff9500','云端同步中…'],err:['#ff3b30','云端同步失败，点设置查看']};
@@ -1188,26 +1185,29 @@ function scheduleSync(){
   clearTimeout(syncTimer); setDot('ing');
   syncTimer=setTimeout(syncPush, 1500);
 }
+function applyRemote(payload){
+  if(!payload || (payload._ts||0) <= (state._ts||0)) return false;
+  ['stars','logs','user','edits','hidden'].forEach(function(k){ if(payload[k]!==undefined) state[k]=payload[k]; });
+  if(payload.cur) state.cur=Object.assign({id:'',name:'',who:'',date:'',people:'',items:[]}, payload.cur);
+  if(payload.ai) state.ai=Object.assign({}, state.ai, payload.ai);
+  state._ts=payload._ts||Date.now(); state.sync.lastSync=Date.now();
+  rawSave(); syncPlanInputs(); refreshAll();
+  return true;
+}
 function syncPush(){
   if(!syncOn() || syncing) return;
   syncing=true; setDot('ing');
-  fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {headers:ghHeaders()})
-  .then(function(r){ return (r.ok||r.status===404)? r.json() : null; })
-  .then(function(old){
-    var remoteSha=null, remoteTs=0;
-    if(old && old.content){
-      try{ remoteTs=(JSON.parse(b64d(old.content))._ts)||0; }catch(e){}
-      remoteSha=old.sha;
-    }
+  fetch(SYNC_API+'?code='+encodeURIComponent(state.sync.code))
+  .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(function(remote){
+    var remoteTs=(remote && remote._ts)||0;
     if(remoteTs > (state._ts||0)){
       /* 云端比本机新：本机可能是还没同步过的新设备，禁止推送覆盖云端，改为拉取 */
       return syncPull().then(function(){ state.sync.lastSync=Date.now(); rawSave(); });
     }
     var payload=Object.assign({}, state); delete payload.sync;
     payload._ts=Date.now(); state._ts=payload._ts;
-    var body={message:'sync '+new Date().toISOString(), content:b64e(JSON.stringify(payload)), branch:'main'};
-    if(remoteSha) body.sha=remoteSha;
-    return fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {method:'PUT', headers:ghHeaders(), body:JSON.stringify(body)})
+    return fetch(SYNC_API+'?code='+encodeURIComponent(state.sync.code), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)})
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); state.sync.lastSync=Date.now(); rawSave(); });
   })
   .then(function(){ syncing=false; setDot('ok'); })
@@ -1215,19 +1215,9 @@ function syncPush(){
 }
 function syncPull(then){
   if(!syncOn()) return Promise.resolve();
-  return fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {headers:ghHeaders()})
-  .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-  .then(function(j){
-    if(!j || !j.content) return;
-    var remote; try{ remote=JSON.parse(b64d(j.content)); }catch(e){ return; }
-    if(!remote || (remote._ts||0) <= (state._ts||0)) return;
-    ['stars','logs','user','edits','hidden'].forEach(function(k){ if(remote[k]!==undefined) state[k]=remote[k]; });
-    if(remote.cur) state.cur=Object.assign({id:'',name:'',who:'',date:'',people:'',items:[]}, remote.cur);
-    if(remote.ai) state.ai=Object.assign({}, state.ai, remote.ai);
-    state._ts=remote._ts||Date.now(); state.sync.lastSync=Date.now();
-    rawSave(); syncPlanInputs(); refreshAll();
-    if(then) then();
-  })
+  return fetch(SYNC_API+'?code='+encodeURIComponent(state.sync.code))
+  .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(function(j){ if(applyRemote(j && j.payload) && then) then(); })
   .catch(function(){ setDot('err'); });
 }
 function startSyncLoop(){
