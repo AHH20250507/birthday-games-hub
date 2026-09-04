@@ -361,8 +361,9 @@ var CATS = ['破冰暖场','分组对抗','爆笑整蛊','协作挑战','温情�
 var GAMES = [];
 
 var KEY = 'bgh_v1';
+var SYNC_DEFAULT = 'lyi-2026';  /* 内置默认同步码：新设备无需填写，打开即自动全量同步 */
 var AI_DEF = {url:'https://ai666.live/v1', key:'sk-FcfEByqfiggSPxsN9BfRnqNmrHCQpVn33kRf3zLkVC9ekjA6', model:'gpt-5.6-sol'};
-var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',who:'',date:'',people:'',items:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model}, sync:{code:'', lastSync:0}, _ts:0};
+var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',who:'',date:'',people:'',items:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model}, sync:{code:SYNC_DEFAULT, lastSync:0}, _ts:0};
 function rawSave(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 function save(){ state._ts=Date.now(); rawSave(); scheduleSync(); }
 function load(){
@@ -376,7 +377,7 @@ function load(){
     if(r.hidden) state.hidden = r.hidden;
     if(r.cur) state.cur = Object.assign(state.cur, r.cur);
     if(r.ai) state.ai = Object.assign({}, state.ai, r.ai);
-    if(r.sync) state.sync = {code:r.sync.code||'', lastSync:r.sync.lastSync||0};
+    if(r.sync) state.sync = {code:r.sync.code||SYNC_DEFAULT, lastSync:r.sync.lastSync||0};
     if(r._ts) state._ts = r._ts;
   }catch(e){}
 }
@@ -993,8 +994,8 @@ function openSettings(){
   h+='<div class="efield efull"><label>模型名称</label><input class="field" id="s_model" value="'+esc(a.model)+'" placeholder="gpt-5.6-sol"></div>';
   h+='</div></div>';
   h+='<div class="msection"><h3>多设备同步</h3>';
-  h+='<div class="efield efull"><label>同步码（自定义短码，所有设备填同一个即可互通）</label><input class="field" id="s_code" autocomplete="off" value="'+esc(state.sync.code)+'" placeholder="例如：lyi-2026"></div>';
-  h+='<div class="ehint">设置同步码并保存后，数据自动同步到腾讯云专属数据库（独立集合，不影响环境里其他项目）。修改约 1.5 秒自动上传，每 30 秒自动拉取。新设备打开本页，在设置里填同一个同步码即可拿到全部数据。</div></div>';
+  h+='<div class="efield efull"><label>同步码（页面已内置，无需填写；如需切换独立数据空间可改）</label><input class="field" id="s_code" autocomplete="off" value="'+esc(state.sync.code)+'" placeholder="'+SYNC_DEFAULT+'"></div>';
+  h+='<div class="ehint">数据自动同步到腾讯云数据库：任何人更新约 1.5 秒自动上传，其他人每 30 秒或切回页面时自动刷新，所有打开本页的人看到的都是同一份数据。新设备打开即同步，什么都不用填。清空此框保存可关闭同步。</div></div>';
   h+='<div class="mafoot"><button class="btn primary" id="s_save">保存</button><button class="btn" id="s_test">测试连接</button><button class="btn" id="s_sync">立即同步</button><span id="s_result" style="font-size:14px;color:var(--muted);align-self:center"></span></div></div>';
   var m=$('#modal'); m.innerHTML=h; m.hidden=false; document.body.style.overflow='hidden';
 }
