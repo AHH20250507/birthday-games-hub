@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>绿怡生日会工作台</title>
+<style>
+:root{
+  --bg:#f5f5f7; --card:#ffffff; --blue:#0071e3; --blue-soft:#e8f2fd;
+  --text:#1d1d1f; --muted:#6e6e73; --faint:#8e8e93;
+  --line:#e3e3e6; --line-2:#d2d2d7;
+  --green:#248a3d; --green-soft:#e6f4ea;
+  --orange:#b25000; --orange-soft:#fdf0e6;
+  --red:#c0272d; --red-soft:#fdeceb;
+  --purple:#6b3fa0; --purple-soft:#f1ebf9;
+  --pink:#ff2d55; --pink-soft:#ffe9ee;
+  --amber:#ff9500; --amber-soft:#fff1e3;
+  --mint:#34c759; --mint-soft:#e7f8ec;
+  --grape:#af52de; --grape-soft:#f4ecfb;
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro SC","PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+  font-size:16px; line-height:1.6; letter-spacing:.01em;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* header */
+header{background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.header-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-top:22px;padding-bottom:16px;flex-wrap:wrap}
+h1{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:2px}
+.tabs button,.tabs .tab-link{border:0;background:transparent;font:inherit;font-size:15px;color:var(--text);padding:7px 18px;border-radius:8px;cursor:pointer;text-decoration:none;line-height:1.6}
+.tabs button.on{background:var(--card);font-weight:500;box-shadow:0 0 0 .5px rgba(0,0,0,.06)}
+
+main.wrap{padding-top:32px;padding-bottom:80px}
+h2{font-size:19px;font-weight:600;letter-spacing:-.01em}
+h3{font-size:16px;font-weight:600}
+.card{background:var(--card);border-radius:var(--r);padding:24px;box-shadow:0 0 0 1px rgba(0,0,0,.03),0 2px 12px rgba(0,0,0,.04)}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:42px;height:42px;flex-shrink:0;display:flex}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.gearbtn{border:1px solid var(--line-2);background:var(--card);width:38px;height:38px;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;margin-bottom:2px}
+.herodot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.review-link{display:inline-block;text-decoration:none}
+.aithumb{position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.aithumb img{width:100%;height:100%;object-fit:cover;display:block}
+.aithumb button{position:absolute;top:2px;right:2px;border:0;background:rgba(0,0,0,.55);color:#fff;width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+
+/* filters */
+.filters{background:var(--card);border-radius:var(--r);padding:6px 22px 18px;margin-bottom:18px}
+.filter-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.filter-summary{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:160px}
+.filter-summary b{font-weight:500;color:var(--text)}
+.filter-bar .field{flex:1;max-width:320px;min-width:180px;border:1px solid var(--line-2);border-radius:10px;padding:9px 14px;font:inherit;font-size:16px;background:var(--card);color:var(--text)}
+.filter-bar .field:focus{outline:0;border-color:var(--blue)}
+.filter-bar .field{height:44px;padding-top:0;padding-bottom:0}
+.filter-bar .btn{height:44px;padding-top:0;padding-bottom:0;display:inline-flex;align-items:center;justify-content:center}
+#filterBody[hidden]{display:none}
+.filter-actions{display:flex;justify-content:flex-end;padding-top:14px}
+.frow{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.frow:last-child{border-bottom:0}
+.flabel{font-size:15px;color:var(--muted);min-width:60px;padding-top:5px;flex-shrink:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;font-size:15px;padding:5px 14px;border-radius:100px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip.ghost.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.search{flex:1;min-width:200px;border:1px solid var(--line-2);border-radius:10px;padding:9px 14px;font:inherit;font-size:16px;background:var(--card);color:var(--text)}
+.search:focus{outline:0;border-color:var(--blue)}
+
+/* toolbar */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.count{font-size:15px;color:var(--muted)}
+.count b{color:var(--text);font-weight:600}
+.tbtns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;font-size:15px;font-weight:500;padding:9px 18px;border-radius:12px;cursor:pointer}
+.btn.primary,.btn.solid{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.sm{font-size:14px;padding:6px 14px;border-radius:9px}
+.btn.ghost{color:var(--red)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.gcard{background:var(--card);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px;position:relative;box-shadow:0 0 0 1px rgba(0,0,0,.03),0 2px 12px rgba(0,0,0,.04)}
+.gcard.used{box-shadow:inset 0 0 0 1.5px var(--orange-soft)}
+.ghead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.gname{font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+.star{border:0;background:transparent;cursor:pointer;padding:2px;flex-shrink:0;line-height:0}
+.star svg{width:19px;height:19px}
+.gtags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:6px;white-space:nowrap}
+.tag.cat{color:var(--purple);background:var(--purple-soft)}
+.tag.cus{color:var(--blue);background:var(--blue-soft)}
+.tag.none{color:var(--green);background:var(--green-soft)}
+.tag.buy{color:var(--orange);background:var(--orange-soft)}
+.tag.used{color:var(--orange);background:var(--orange-soft)}
+.gdesc{font-size:15px;color:var(--muted);line-height:1.65;flex:1}
+.gfoot{display:flex;gap:8px;padding-top:2px}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.35);display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto}
+.modal[hidden]{display:none}
+.mbox{background:var(--card);border-radius:22px;max-width:720px;width:100%;padding:32px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.mclose{position:absolute;top:22px;right:24px;border:0;background:transparent;font-size:26px;line-height:1;color:var(--faint);cursor:pointer}
+.mtitle{font-size:25px;font-weight:600;letter-spacing:-.01em;padding-right:40px;line-height:1.35}
+.msub{font-size:15px;color:var(--muted);margin-top:6px}
+.msection{margin-top:26px}
+.msection h3{font-size:15px;color:var(--muted);font-weight:500;margin-bottom:10px}
+.mtext{font-size:16px;line-height:1.75}
+ol.steps{margin:0;padding-left:22px}
+ol.steps li{margin-bottom:8px;font-size:16px;line-height:1.75}
+.mbox.dropping{outline:2px dashed var(--blue);outline-offset:-10px}
+ul.plain{margin:0;padding-left:20px}
+ul.plain li{margin-bottom:7px;font-size:16px;line-height:1.7}
+.pit{color:var(--red)}
+.ptable{width:100%;border-collapse:collapse;font-size:15px}
+.ptable th{text-align:left;font-weight:500;color:var(--muted);font-size:14px;padding:0 0 8px;border-bottom:1px solid var(--line)}
+.ptable td{padding:9px 0;border-bottom:1px solid var(--line)}
+.ptable tr:last-child td{border-bottom:0}
+.ptable .num{text-align:right;font-variant-numeric:tabular-nums}
+.mafoot{display:flex;gap:10px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line);flex-wrap:wrap}
+.field{width:100%;border:1px solid var(--line-2);border-radius:10px;padding:10px 14px;font:inherit;font-size:16px;background:var(--card);color:var(--text)}
+.field:focus{outline:0;border-color:var(--blue)}
+textarea.field{resize:vertical;min-height:64px;line-height:1.6}
+
+/* plan */
+.plan-head{margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;align-items:end}
+.plan-head .full{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.plan-body{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+.plan-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.plan-item:last-child{border-bottom:0}
+.pidx{width:28px;height:28px;border-radius:50%;background:var(--bg);color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-variant-numeric:tabular-nums}
+.pmain{flex:1;min-width:0}
+.pname{font-size:17px;font-weight:500}
+.plink{border:0;background:none;font:inherit;color:inherit;padding:0;cursor:pointer;text-align:left}
+.plink:hover{color:var(--blue)}
+.pops{display:flex;gap:4px;flex-shrink:0}
+.iconbtn{border:1px solid var(--line-2);background:var(--card);width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+.iconbtn:disabled{opacity:.3;cursor:default}
+.pside{position:sticky;top:100px}
+.side-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:15px;border-bottom:1px solid var(--line)}
+.side-row:last-child{border-bottom:0}
+.side-row .v{font-variant-numeric:tabular-nums;color:var(--text)}
+.side-row .v.mut{color:var(--muted)}
+.empty{color:var(--faint);font-size:15px;padding:30px 0;text-align:center}
+
+/* log */
+.logform{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;align-items:end;margin-bottom:18px}
+.logform .full{grid-column:1/-1}
+.logitem{padding:16px 0;border-bottom:1px solid var(--line)}
+.logitem:last-child{border-bottom:0}
+.logtop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logdate{font-size:16px;font-weight:500}
+.logocc{font-size:14px;color:var(--muted)}
+.loggames{font-size:15px;color:var(--muted);margin-top:6px;line-height:1.7}
+.lognote{font-size:15px;margin-top:6px;color:var(--text)}
+.statrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.statrow:last-child{border-bottom:0}
+.statrow .n{width:22px;color:var(--faint);font-variant-numeric:tabular-nums;font-size:14px}
+.statrow .nm{flex:1}
+.bar{width:110px;height:7px;background:var(--bg);border-radius:100px;overflow:hidden;flex-shrink:0}
+.bar i{display:block;height:100%;background:var(--orange);border-radius:100px}
+
+/* editor */
+.egrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:14px;margin-top:6px}
+.efull{grid-column:1/-1}
+.efield label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+.checks{display:flex;gap:16px;flex-wrap:wrap;align-items:center;min-height:44px}
+.checks label{display:flex;align-items:center;gap:6px;font-size:15px;cursor:pointer}
+.checks input{width:17px;height:17px;accent-color:var(--blue)}
+.prow{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.prow .pn{flex:1;min-width:130px}
+.prow input[type=number]{width:70px;text-align:center}
+.prow .pu{width:58px;text-align:center}
+.prow .del{border:1px solid var(--line-2);background:var(--card);width:30px;height:38px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:16px;flex-shrink:0}
+.ehint{font-size:13px;color:var(--faint);margin-top:6px;line-height:1.6}
+
+@media (max-width:860px){
+  .plan-body{grid-template-columns:1fr}
+  .pside{position:static}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  h1{font-size:22px}
+  .hdr-right{width:100%;flex-wrap:wrap}
+  .tabs{width:100%;margin-top:14px}
+  .tabs button{flex:1;padding:8px 6px;font-size:15px}
+  .frow{flex-direction:column;gap:8px}
+  .flabel{padding-top:0;font-size:14px}
+  .grid{grid-template-columns:1fr}
+  .mbox{padding:22px 18px;border-radius:14px}
+  .mtitle{font-size:21px}
+  .modal{padding:16px 10px}
+  .mafoot .btn{flex:1;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="9" y="19" width="24" height="15" rx="3" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.8"/>
+          <rect x="6" y="15" width="30" height="6" rx="2" fill="#0071e3"/>
+          <rect x="19" y="15" width="4" height="19" fill="#ff9500"/>
+          <ellipse cx="15.5" cy="12.5" rx="5.5" ry="4.5" fill="#ff2d55"/>
+          <ellipse cx="26.5" cy="12.5" rx="5.5" ry="4.5" fill="#ff2d55"/>
+          <circle cx="21" cy="14.5" r="2.4" fill="#34c759"/>
+        </svg>
+      </span>
+      <div>
+        <h1>绿怡生日会工作台</h1>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <nav class="tabs">
+        <button data-view="lib" class="on">游戏库</button>
+        <button data-view="plan">本次生日会</button>
+        <button data-view="log">往期记录</button>
+        <a class="tab-link" href="https://p1tnczsuynd.feishu.cn/drive/folder/Q1HJfVsWulf5p2dbGxCcl9k9nDc" target="_blank" rel="noopener">生日会回顾</a>
+      </nav>
+      <span id="syncDot" style="width:9px;height:9px;border-radius:50%;background:#c7c7cc;flex-shrink:0;margin-bottom:2px" title="同步未配置"></span>
+      <button class="gearbtn" id="btnSettings" title="设置">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.29 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.27.62.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.03z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="view-lib">
+    <div class="filters" id="filters">
+      <div class="filter-bar">
+        <div class="filter-summary" id="filterSummary"></div>
+        <input class="field" id="q" placeholder="搜索游戏名、玩法、关键词，例如：不用道具" value="">
+        <button class="btn sm" id="btnToggleFilter">展开筛选</button>
+      </div>
+      <div id="filterBody"></div>
+    </div>
+    <div class="toolbar">
+      <span class="count" id="count"></span>
+      <div class="tbtns">
+        <button class="btn sm" id="btnAiImport">AI自动录入</button>
+        <button class="btn sm" id="btnNewGame">手动录入</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="view-plan" hidden>
+    <div class="card plan-head">
+      <div class="full">
+        <input class="field" id="planTitle" placeholder="生日会名称，例如：9 月产品部生日会">
+        <div class="tbtns">
+          <button class="btn primary" id="btnSavePlan">保存生日会</button>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:14px;color:var(--muted)">日期</label>
+        <input class="field" id="planDate" type="date" style="margin-top:6px">
+      </div>
+      <div>
+        <label style="font-size:14px;color:var(--muted)">人数</label>
+        <input class="field" id="planPeople" type="number" placeholder="例如：30" style="margin-top:6px">
+      </div>
+    </div>
+
+    <div class="plan-body">
+      <div class="card">
+        <h2 style="margin-bottom:6px">这场生日会的游戏</h2>
+        <div id="planList"></div>
+      </div>
+      <aside class="card pside">
+        <h2 style="margin-bottom:6px">道具清单</h2>
+        <div id="propList"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="view-log" hidden>
+    <div class="card" style="margin-bottom:16px">
+      <h2 style="margin-bottom:16px">查询往期记录</h2>
+      <div class="logform">
+        <div>
+          <label style="font-size:14px;color:var(--muted)">按生日会查询</label>
+          <select class="field" id="logByParty" style="margin-top:6px"><option value="">全部生日会</option></select>
+        </div>
+        <div>
+          <label style="font-size:14px;color:var(--muted)">按游戏查询</label>
+          <select class="field" id="logByGame" style="margin-top:6px"><option value="">全部游戏</option></select>
+        </div>
+      </div>
+      <div id="logResult" style="margin-top:16px"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <h2 style="margin-bottom:6px">全部记录</h2>
+      <div id="logList"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom:6px">游戏战绩</h2>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:14px">玩过次数越多，说明越经得起反复玩</p>
+      <div id="statList"></div>
+    </div>
+  </section>
+
+</main>
+
+<div id="modal" class="modal" hidden></div>
+
+<script>
+var CATS = ['破冰暖场','分组对抗','爆笑整蛊','协作挑战','温情收尾'];
+
+var GAMES = [];
+
+var KEY = 'bgh_v1';
+var SYNC_REPO = 'AHH20250507/bgh-sync-data';
+var AI_DEF = {url:'https://ai666.live/v1', key:'sk-FcfEByqfiggSPxsN9BfRnqNmrHCQpVn33kRf3zLkVC9ekjA6', model:'gpt-5.6-sol'};
+var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',who:'',date:'',people:'',items:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model}, sync:{token:'', lastSync:0}, _ts:0};
+function rawSave(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+function save(){ state._ts=Date.now(); rawSave(); scheduleSync(); }
+function load(){
+  try{
+    var r = JSON.parse(localStorage.getItem(KEY));
+    if(!r) return;
+    if(r.stars) state.stars = r.stars;
+    if(r.logs) state.logs = r.logs;
+    if(r.user) state.user = r.user;
+    if(r.edits) state.edits = r.edits;
+    if(r.hidden) state.hidden = r.hidden;
+    if(r.cur) state.cur = Object.assign(state.cur, r.cur);
+    if(r.ai) state.ai = Object.assign({}, state.ai, r.ai);
+    if(r.sync) state.sync = Object.assign(state.sync, {token:r.sync.token||'', lastSync:r.sync.lastSync||0});
+    if(r._ts) state._ts = r._ts;
+  }catch(e){}
+}
+function ALL(){
+  var out=[];
+  GAMES.forEach(function(g){
+    if(state.hidden.indexOf(g.id)>=0) return;
+    out.push(state.edits[g.id] ? Object.assign({}, g, state.edits[g.id]) : g);
+  });
+  state.user.forEach(function(g){ if(state.hidden.indexOf(g.id)<0) out.push(g); });
+  return out;
+}
+function isCustom(id){ return String(id).indexOf('u_')===0; }
+
+var FCFG = [
+  {k:'cat',   label:'环节', opts:CATS},
+  {k:'ppl',   label:'人数', opts:['10人以下','10-20人','20-50人','50人以上']},
+  {k:'dur',   label:'时长', opts:['5分钟内','5-15分钟','15-30分钟','30分钟以上']},
+  {k:'venue', label:'场地', opts:['会议室','开阔场地','户外','座位上']},
+  {k:'plv',   label:'道具', opts:['无道具','纸笔','手机','需采购']},
+  {k:'noise', label:'音量', opts:['安静','中等','吵闹']}
+];
+var PRANGE = {'10人以下':[1,10],'10-20人':[10,20],'20-50人':[20,50],'50人以上':[50,999]};
+var DRANGE = {'5分钟内':[0,5],'5-15分钟':[5,15],'15-30分钟':[15,30],'30分钟以上':[30,999]};
+var NVAL = {'安静':1,'中等':2,'吵闹':3};
+var NTXT = {1:'安静',2:'中等',3:'吵闹'};
+var MTXT = {1:'原地',2:'走动',3:'跑动'};
+var CAT_COLOR={'破冰暖场':'#0071e3','分组对抗':'#ff9500','爆笑整蛊':'#ff2d55','协作挑战':'#34c759','温情收尾':'#af52de','过渡':'#8e8e93'};
+var CAT_TINT={'破冰暖场':'#e8f2fd','分组对抗':'#fff1e3','爆笑整蛊':'#ffe9ee','协作挑战':'#e7f8ec','温情收尾':'#f4ecfb','过渡':'#f2f2f4'};
+function catStyle(cat){ return 'color:'+(CAT_COLOR[cat]||'#6e6e73')+';background:'+(CAT_TINT[cat]||'#f2f2f4'); }
+var F = {cat:'',ppl:'',dur:'',venue:'',plv:'',noise:'',shy:false,star:false,fresh:false,q:'',collapsed:true};
+
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function gid(id){ var a=ALL(); for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return null; }
+function starred(id){ return state.stars.indexOf(id)>=0; }
+function lastPlayed(id){
+  var d='';
+  state.logs.forEach(function(l){ if(l.gids.indexOf(id)>=0 && l.date>d) d=l.date; });
+  return d;
+}
+function daysAgo(ds){
+  if(!ds) return 99999;
+  var t=new Date(ds).getTime(); if(isNaN(t)) return 99999;
+  return Math.floor((Date.now()-t)/86400000);
+}
+function playsCount(id){
+  var n=0;
+  state.logs.forEach(function(l){ if(l.gids && l.gids.indexOf(id)>=0) n++; });
+  return n;
+}
+function inPlan(id){ for(var i=0;i<state.cur.items.length;i++){ if(state.cur.items[i].gid===id) return true; } return false; }
+
+function match(g){
+  if(F.cat && g.cat!==F.cat) return false;
+  if(F.ppl){ var r=PRANGE[F.ppl]; if(!(g.min<=r[1] && g.max>=r[0])) return false; }
+  if(F.dur){ var d=DRANGE[F.dur]; if(!(g.dur<=d[1] && g.dur>=d[0])) return false; }
+  if(F.venue && g.venue.indexOf(F.venue)<0) return false;
+  if(F.plv && g.pl!==F.plv) return false;
+  if(F.noise && g.noise!==NVAL[F.noise]) return false;
+  if(F.shy && !g.shy) return false;
+  if(F.star && !starred(g.id)) return false;
+  if(F.fresh && daysAgo(lastPlayed(g.id))<180) return false;
+  if(F.q){
+    var q=F.q.toLowerCase();
+    var hay=(g.name+' '+g.cat+' '+g.desc+' '+(g.variants||[]).join(' ')).toLowerCase();
+    if(hay.indexOf(q)<0) return false;
+  }
+  return true;
+}
+function matched(){ return ALL().filter(match); }
+
+function starSvg(on){
+  return '<svg viewBox="0 0 24 24" fill="'+(on?'#e8a33d':'none')+'" stroke="'+(on?'#e8a33d':'#c7c7cc')+'" stroke-width="1.4" stroke-linejoin="round"><path d="M12 2.6l3 6.1 6.7 1-4.9 4.7 1.2 6.7L12 18l-6 2.9 1.2-6.7-4.9-4.7 6.7-1z"/></svg>';
+}
+
+/* ---------- 游戏库 ---------- */
+function filtersHtml(){
+  var h='';
+  FCFG.forEach(function(f){
+    h+='<div class="frow"><div class="flabel">'+f.label+'</div><div class="chips">';
+    h+='<button class="chip" data-k="'+f.k+'" data-v="">全部</button>';
+    f.opts.forEach(function(o){
+      h+='<button class="chip" data-k="'+f.k+'" data-v="'+esc(o)+'">'+esc(o)+'</button>';
+    });
+    h+='</div></div>';
+  });
+  h+='<div class="frow"><div class="flabel">筛选</div><div class="chips">';
+  h+='<button class="chip ghost" data-k="shy" data-v="1">社恐友好</button>';
+  h+='<button class="chip ghost" data-k="star" data-v="1">只看收藏</button>';
+  h+='<button class="chip ghost" data-k="fresh" data-v="1">排除半年内玩过的</button>';
+  h+='</div></div>';
+  h+='<div class="filter-actions"><button class="btn sm" id="btnClear">清空筛选</button></div>';
+  return h;
+}
+function syncFilters(){
+  document.querySelectorAll('#filterBody .chip').forEach(function(b){
+    var k=b.getAttribute('data-k'), v=b.getAttribute('data-v');
+    var on = (k==='shy'||k==='star'||k==='fresh') ? !!F[k] : (!F[k] ? v==='' : F[k]===v);
+    b.classList.toggle('on', on);
+  });
+}
+function renderFilterSummary(){
+  var parts=[];
+  FCFG.forEach(function(f){ if(F[f.k]) parts.push(f.label+'：'+F[f.k]); });
+  if(F.shy) parts.push('社恐友好');
+  if(F.star) parts.push('只看收藏');
+  if(F.fresh) parts.push('排除半年内玩过的');
+  if(F.q) parts.push('搜索「'+F.q+'」');
+  $('#filterSummary').textContent = parts.length? parts.join(' · ') : '未选择筛选条件';
+  $('#btnToggleFilter').textContent = F.collapsed? '展开筛选' : '收起筛选';
+  $('#filterBody').hidden = F.collapsed;
+}
+$('#filterBody').innerHTML = filtersHtml();
+$('#filters').addEventListener('click', function(e){
+  if(e.target.id==='btnClear'){
+    F={cat:'',ppl:'',dur:'',venue:'',plv:'',noise:'',shy:false,star:false,fresh:false,q:'',collapsed:false};
+    renderLib();
+    return;
+  }
+  var b=e.target.closest('.chip'); if(!b) return;
+  var k=b.getAttribute('data-k'), v=b.getAttribute('data-v');
+  if(k==='shy'||k==='star'||k==='fresh'){ F[k]=!F[k]; } else { F[k]=v; }
+  renderLib();
+});
+$('#filters').addEventListener('input', function(e){
+  if(e.target.id!=='q') return;
+  F.q=e.target.value.trim();
+  renderLib();
+});
+$('#btnToggleFilter').addEventListener('click', function(){
+  F.collapsed=!F.collapsed;
+  renderFilterSummary();
+  syncFilters();
+});
+
+function cardHtml(g){
+  var lp=lastPlayed(g.id), recent=daysAgo(lp)<180;
+  var t='<div class="gcard'+(recent?' used':'')+'">';
+  t+='<div class="ghead"><div class="gname">'+esc(g.name)+'</div>';
+  t+='<button class="star" data-star="'+g.id+'" title="收藏">'+starSvg(starred(g.id))+'</button></div>';
+  t+='<div class="gtags">';
+  t+='<span class="tag" style="'+catStyle(g.cat)+'">'+esc(g.cat)+'</span>';
+  if(isCustom(g.id)) t+='<span class="tag cus">自定义</span>';
+  t+='<span class="tag">'+g.min+'-'+g.max+' 人</span>';
+  t+='<span class="tag">'+g.dur+' 分钟</span>';
+  t+='<span class="tag">'+esc(g.venue.join(' / '))+'</span>';
+  t+='<span class="tag'+(g.pl==='无道具'?' none':(g.pl==='需采购'?' buy':''))+'">'+esc(g.pl)+'</span>';
+  t+='<span class="tag">'+NTXT[g.noise]+'</span>';
+  if(g.shy) t+='<span class="tag none">社恐友好</span>';
+  if(recent) t+='<span class="tag used">'+esc(lp)+' 玩过</span>';
+  t+='</div>';
+  t+='<div class="gdesc">'+esc(g.desc)+'</div>';
+  t+='<div class="gfoot"><button class="btn sm" data-open="'+g.id+'">查看详情</button>';
+  t+='<button class="btn sm'+(inPlan(g.id)?'':' solid')+'" data-add="'+g.id+'">'+(inPlan(g.id)?'从流程移除':'加入流程')+'</button>';
+  t+='<button class="btn sm ghost" data-del="'+g.id+'" title="删除游戏">删除</button></div>';
+  t+='</div>';
+  return t;
+}
+
+function renderLib(){
+  syncFilters();
+  renderFilterSummary();
+  var list=matched();
+  $('#count').innerHTML='共 <b>'+list.length+'</b> 个游戏';
+  $('#grid').innerHTML = list.length? list.map(cardHtml).join('') : '<div class="empty">游戏库为空，请点击“AI自动录入”或“手动录入”添加第一个游戏</div>';
+}
+
+$('#grid').addEventListener('click', function(e){
+  var s=e.target.closest('[data-star]');
+  if(s){ var id=s.getAttribute('data-star');
+    var i=state.stars.indexOf(id);
+    if(i>=0) state.stars.splice(i,1); else state.stars.push(id);
+    save(); renderLib(); return; }
+  var o=e.target.closest('[data-open]');
+  if(o){ openGame(o.getAttribute('data-open')); return; }
+  var a=e.target.closest('[data-add]');
+  if(a){ togglePlan(a.getAttribute('data-add')); renderLib(); renderPlan(); }
+  var dl=e.target.closest('[data-del]');
+  if(dl){ delGameFromLib(dl.getAttribute('data-del')); }
+});
+
+/* ---------- 详情弹窗 ---------- */
+var currentGid=null;
+function openGame(id){
+  var g=gid(id); if(!g) return;
+  currentGid=id;
+  var lp=lastPlayed(g.id);
+  var h='<div class="mbox">';
+  h+='<button class="mclose" onclick="closeModal()">&times;</button>';
+  h+='<div class="mtitle"><span class="herodot" style="background:'+CAT_COLOR[g.cat]+'"></span>'+esc(g.name)+'</div>';
+  h+='<div class="msub"><span class="tag" style="'+catStyle(g.cat)+'">'+esc(g.cat)+'</span> &nbsp;'+g.min+'-'+g.max+' 人 · '+g.dur+' 分钟 · '+esc(g.venue.join(' / '))+' · '+esc(g.pl)+' · '+NTXT[g.noise]+' · '+MTXT[g.move]+(g.shy?' · 社恐友好':'')+'</div>';
+  h+='<div class="msection"><div class="mtext">'+esc(g.desc)+'</div></div>';
+
+  h+='<div class="msection"><h3>道具</h3>';
+  if(!g.props.length){ h+='<div class="mtext" style="color:var(--green)">无需任何道具</div>'; }
+  else{
+    h+='<table class="ptable"><tr><th>名称</th><th style="text-align:right">数量</th><th style="text-align:right">单价</th><th style="text-align:right">小计</th></tr>';
+    var tot=0;
+    g.props.forEach(function(p){
+      var sub=p.buy? Math.round(p.q*p.p*100)/100 : 0; tot+=sub;
+      h+='<tr><td>'+esc(p.n)+(p.buy?' <span class="tag buy">需采购</span>':' <span class="tag none">办公室现成</span>')+'</td>'+
+         '<td class="num">'+p.q+' '+esc(p.u)+'</td>'+
+         '<td class="num">'+(p.buy?'¥'+p.p:'—')+'</td>'+
+         '<td class="num">'+(p.buy?'¥'+sub.toFixed(2):'—')+'</td></tr>';
+    });
+    h+='<tr><td><b>合计</b></td><td class="num"></td><td class="num"></td><td class="num"><b>¥'+tot.toFixed(2)+'</b></td></tr>';
+    h+='</table>';
+  }
+  h+='</div>';
+
+  h+='<div class="msection"><h3 style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>游戏规则</span><button class="btn sm" data-copyrules="'+g.id+'">复制规则</button></h3>';
+  if(g.steps.length){ h+='<ol class="steps">'; g.steps.forEach(function(s){ h+='<li>'+esc(s)+'</li>'; }); h+='</ol>'; }
+  else h+='<div class="mtext" style="font-size:15px;color:var(--faint)">还没有填写规则，点下方「编辑」补充</div>';
+  h+='</div>';
+
+  if(g.variants.length){ h+='<div class="msection"><h3>变体玩法</h3><ul class="plain">'; g.variants.forEach(function(s){ h+='<li>'+esc(s)+'</li>'; }); h+='</ul></div>'; }
+
+  if(g.pits.length){ h+='<div class="msection"><h3>踩坑提醒</h3><ul class="plain pit">'; g.pits.forEach(function(s){ h+='<li>'+esc(s)+'</li>'; }); h+='</ul></div>'; }
+
+  h+='<div class="msection"><h3>历史</h3><div class="mtext" style="font-size:15px;color:var(--muted)">';
+  var cnt=0; state.logs.forEach(function(l){ if(l.gids.indexOf(g.id)>=0) cnt++; });
+  h+= cnt? '玩过 '+cnt+' 次，最近一次 '+esc(lp) : '还没玩过';
+  h+='</div></div>';
+
+  h+='<div class="mafoot">';
+  h+='<button class="btn'+(inPlan(g.id)?'':' primary')+'" data-madd="'+g.id+'">'+(inPlan(g.id)?'从流程移除':'加入流程')+'</button>';
+  h+='<button class="btn" data-mstar="'+g.id+'">'+(starred(g.id)?'取消收藏':'收藏')+'</button>';
+  h+='<button class="btn" data-medit="'+g.id+'">编辑</button>';
+  h+='<button class="btn" data-mhide="'+g.id+'">删除</button>';
+  h+='</div></div>';
+
+  var m=$('#modal');
+  m.innerHTML=h; m.hidden=false;
+  document.body.style.overflow='hidden';
+}
+function closeModal(){ $('#modal').hidden=true; $('#modal').innerHTML=''; document.body.style.overflow=''; }
+function fallbackCopy(txt){
+  var ta=document.createElement('textarea');
+  ta.value=txt; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); alert('已复制，可直接粘贴到 PPT。'); }
+  catch(e){ prompt('手动复制：', txt); }
+  document.body.removeChild(ta);
+}
+function copyText(txt){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){ alert('已复制，可直接粘贴到 PPT。'); }, function(){ fallbackCopy(txt); });
+  } else fallbackCopy(txt);
+}
+function copyRules(id){
+  var g=gid(id); if(!g) return;
+  var t='【'+g.name+'】';
+  t+='\n人数：'+g.min+'-'+g.max+'人 · 时长：'+g.dur+'分钟 · 道具：'+(g.props.length? g.props.map(function(p){ return p.n+'×'+p.q; }).join('、') : '无');
+  t+='\n游戏规则：';
+  g.steps.forEach(function(s,i){ t+='\n'+(i+1)+'、'+s; });
+  copyText(t);
+}
+
+$('#modal').addEventListener('click', function(e){
+  if(e.target.id==='modal'){ closeModal(); return; }
+  var c=e.target.closest('.mclose'); if(c){ closeModal(); return; }
+  var cr=e.target.closest('[data-copyrules]');
+  if(cr){ copyRules(cr.getAttribute('data-copyrules')); return; }
+  var a=e.target.closest('[data-madd]');
+  if(a){ togglePlan(a.getAttribute('data-madd')); openGame(a.getAttribute('data-madd')); renderLib(); renderPlan(); return; }
+  var st=e.target.closest('[data-mstar]');
+  if(st){ var id=st.getAttribute('data-mstar'), i=state.stars.indexOf(id);
+    if(i>=0) state.stars.splice(i,1); else state.stars.push(id);
+    save(); openGame(id); renderLib(); return; }
+});
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+
+/* ---------- 本次生日会 ---------- */
+function togglePlan(id){
+  var items=state.cur.items, found=-1;
+  for(var i=0;i<items.length;i++){ if(items[i].gid===id) found=i; }
+  if(found>=0) items.splice(found,1);
+  else { var g=gid(id); items.push({gid:id, type:'game', dur:g.dur}); }
+  save(); renderPlan();
+}
+function itemName(it){ return it.type==='break'? '休息 / 自由交流' : (gid(it.gid)? gid(it.gid).name : '已删除'); }
+
+function renderPlan(){
+  var items=state.cur.items;
+  if(!items.length){
+    $('#planList').innerHTML='<div class="empty">还没有游戏。去「游戏库」挑几个，点卡片上的「加入流程」。</div>';
+  } else {
+    var h='';
+    items.forEach(function(it,i){
+      var g=it.type==='game'? gid(it.gid):null;
+      h+='<div class="plan-item">';
+      h+='<div class="pidx">'+(i+1)+'</div>';
+      if(g){
+        h+='<div class="pmain"><button class="pname plink" data-mopen="'+g.id+'">'+esc(itemName(it))+'</button></div>';
+      } else {
+        h+='<div class="pmain"><div class="pname">'+esc(itemName(it))+'</div></div>';
+      }
+      h+='<div class="pops">';
+      h+='<button class="iconbtn" data-up="'+i+'"'+(i===0?' disabled':'')+'>&uarr;</button>';
+      h+='<button class="iconbtn" data-dn="'+i+'"'+(i===items.length-1?' disabled':'')+'>&darr;</button>';
+      h+='<button class="iconbtn" data-rm="'+i+'">&times;</button>';
+      h+='</div></div>';
+    });
+    $('#planList').innerHTML=h;
+  }
+  renderProps();
+}
+function renderProps(){
+  var buy={}, own={};
+  state.cur.items.forEach(function(it){
+    if(it.type!=='game') return;
+    var g=gid(it.gid); if(!g) return;
+    g.props.forEach(function(p){
+      var k=p.n+'|'+p.u;
+      var t=p.buy? buy:own;
+      if(!t[k]) t[k]={n:p.n,u:p.u,q:0,p:p.p};
+      t[k].q+=p.q;
+    });
+  });
+  var h='', tot=0, n=0;
+  Object.keys(buy).forEach(function(k){
+    var v=buy[k], sub=Math.round(v.q*v.p*100)/100; tot+=sub; n++;
+    h+='<div class="side-row"><span>'+esc(v.n)+'</span><span class="v">'+v.q+' '+esc(v.u)+' · ¥'+sub.toFixed(2)+'</span></div>';
+  });
+  if(!n) h+='<div class="empty">这个方案不需要采购任何东西</div>';
+  else h+='<div class="side-row"><span><b>预算合计</b></span><span class="v"><b>¥'+tot.toFixed(2)+'</b></span></div>';
+
+  var ownKeys=Object.keys(own);
+  if(ownKeys.length){
+    h+='<div style="margin-top:18px;font-size:14px;color:var(--muted);margin-bottom:8px">办公室现成 / 需自备</div>';
+    ownKeys.forEach(function(k){
+      var v=own[k];
+      h+='<div class="side-row"><span>'+esc(v.n)+'</span><span class="v mut">'+v.q+' '+esc(v.u)+'</span></div>';
+    });
+  }
+  $('#propList').innerHTML=h;
+}
+
+$('#planList').addEventListener('click', function(e){
+  var o;
+  if((o=e.target.closest('[data-mopen]'))){ openGame(o.getAttribute('data-mopen')); return; }
+  var b;
+  if((b=e.target.closest('[data-up]'))){ var i=+b.getAttribute('data-up');
+    var a=state.cur.items; var tmp=a[i]; a[i]=a[i-1]; a[i-1]=tmp; save(); renderPlan(); return; }
+  if((b=e.target.closest('[data-dn]'))){ var j=+b.getAttribute('data-dn');
+    var c=state.cur.items; var t2=c[j]; c[j]=c[j+1]; c[j+1]=t2; save(); renderPlan(); return; }
+  if((b=e.target.closest('[data-rm]'))){ state.cur.items.splice(+b.getAttribute('data-rm'),1); save(); renderPlan(); renderLib(); return; }
+});
+['planTitle','planDate','planPeople'].forEach(function(id){
+  var k={planTitle:'name',planDate:'date',planPeople:'people'}[id];
+  $('#'+id).addEventListener('input', function(e){ state.cur[k]=e.target.value; save(); });
+});
+
+$('#btnSavePlan').addEventListener('click', function(){
+  if(!state.cur.items.length){ alert('还没加游戏，先去「游戏库」挑几个加入这场生日会。'); return; }
+  if(!state.cur.name){ state.cur.name=prompt('给这场生日会起个名字', '生日会 '+(state.logs.length+1)); if(!state.cur.name) return; $('#planTitle').value=state.cur.name; }
+  if(!state.cur.id) state.cur.id='p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  var gids=state.cur.items.filter(function(it){ return it.type==='game'; }).map(function(it){ return it.gid; });
+  var entry={pid:state.cur.id, name:state.cur.name, who:state.cur.who, date:state.cur.date||todayStr(), people:state.cur.people, gids:gids};
+  var li=-1; state.logs.forEach(function(l,i){ if(l.pid===state.cur.id) li=i; });
+  if(li>=0) state.logs[li]=entry; else state.logs.push(entry);
+  // 保存后开启一场新的生日会草稿
+  state.cur={id:'',name:'',who:'',date:'',people:'',items:[]};
+  save(); syncPlanInputs(); renderPlan(); renderLogQueryOpts(); renderLogQuery(); renderLogs(); renderStats(); renderLib();
+});
+function syncPlanInputs(){
+  $('#planTitle').value=state.cur.name||'';
+  $('#planDate').value=state.cur.date||'';
+  $('#planPeople').value=state.cur.people||'';
+}
+/* ---------- 使用记录 ---------- */
+function renderLogQueryOpts(){
+  var hp='<option value="">全部生日会</option>';
+  state.logs.slice().sort(function(a,b){ return (b.date||'')<(a.date||'')?-1:1; }).forEach(function(l){
+    hp+='<option value="'+esc(l.pid||'')+'">'+esc((l.name||l.occ||'未命名生日会')+(l.date?' · '+l.date:''))+'</option>';
+  });
+  $('#logByParty').innerHTML=hp;
+  var hg='<option value="">全部游戏</option>';
+  ALL().forEach(function(g){ hg+='<option value="'+esc(g.id)+'">'+esc(g.name)+'</option>'; });
+  $('#logByGame').innerHTML=hg;
+}
+function renderLogQuery(){
+  var pid=$('#logByParty').value, gidv=$('#logByGame').value;
+  var h='';
+  if(pid){
+    var l=state.logs.filter(function(x){ return x.pid===pid; })[0];
+    if(!l){ h='<div class="empty">找不到这条生日会记录。</div>'; }
+    else {
+      h+='<div class="logtop"><span class="logdate">'+esc(l.date||'')+'</span>';
+      h+='<span class="logocc">'+esc(l.name||l.occ||'未命名生日会')+'</span>';
+      if(l.who) h+='<span class="logocc">'+esc(l.who)+'</span>';
+      if(l.people) h+='<span class="logocc">'+esc(l.people)+' 人</span></div>';
+      var names=(l.gids||[]).map(function(id){ var g=gid(id); return g? g.name : ''; }).filter(Boolean);
+      h+='<div class="loggames">'+(names.length? names.join('、') : '（无游戏）')+'</div>';
+    }
+  } else if(gidv){
+    var ls=state.logs.filter(function(x){ return (x.gids||[]).indexOf(gidv)>=0; });
+    if(!ls.length){ h='<div class="empty">这个游戏还没在记录里出现过。</div>'; }
+    else {
+      ls.sort(function(a,b){ return (b.date||'')<(a.date||'')?-1:1; });
+      h+='<div style="font-size:14px;color:var(--muted);margin-bottom:8px">共出现在 '+ls.length+' 场生日会：</div>';
+      ls.forEach(function(l){
+        h+='<div class="logitem"><div class="logtop"><span class="logdate">'+esc(l.date||'')+'</span>';
+        h+='<span class="logocc">'+esc(l.name||l.occ||'未命名生日会')+'</span></div></div>';
+      });
+    }
+  } else {
+    h='<div class="empty" style="padding:18px 0">选择上方条件，按生日会或按游戏查看记录。</div>';
+  }
+  $('#logResult').innerHTML=h;
+}
+$('#logByParty').addEventListener('change', function(){ $('#logByGame').value=''; renderLogQuery(); });
+$('#logByGame').addEventListener('change', function(){ $('#logByParty').value=''; renderLogQuery(); });
+function renderLogs(){
+  if(!state.logs.length){ $('#logList').innerHTML='<div class="empty">还没有记录。在「生日会游戏」里保存一场生日会，就会自动同步到这里。</div>'; return; }
+  var ls=state.logs.slice().sort(function(a,b){ return (a.date||'')<(b.date||'')?1:-1; });
+  var h='';
+  ls.forEach(function(l){
+    var idx=state.logs.indexOf(l);
+    var names=(l.gids||[]).map(function(id){ var g=gid(id); return g? g.name : ''; }).filter(Boolean);
+    h+='<div class="logitem"><div class="logtop"><span class="logdate">'+esc(l.date||'')+'</span>';
+    h+='<span class="logocc">'+esc(l.name||'未命名生日会')+'</span>';
+    if(l.people) h+='<span class="logocc">'+esc(l.people)+' 人</span>';
+    h+='<button class="btn sm" data-dellog="'+idx+'">删除</button></div>';
+    h+='<div class="loggames">'+esc(names.join('、'))+'</div>';
+    h+='</div>';
+  });
+  $('#logList').innerHTML=h;
+}
+$('#logList').addEventListener('click', function(e){
+  var b=e.target.closest('[data-dellog]'); if(!b) return;
+  if(!confirm('删除这条记录？')) return;
+  var idx=+b.getAttribute('data-dellog');
+  var l=state.logs[idx];
+  state.logs.splice(idx,1);
+  save(); renderLogs(); renderStats(); renderLogQueryOpts(); renderLogQuery(); renderPlan(); renderLib();
+});
+function renderStats(){
+  var rows=ALL().map(function(g){
+    return {g:g, cnt:playsCount(g.id), last:lastPlayed(g.id)};
+  }).filter(function(r){ return r.cnt>0; })
+    .sort(function(a,b){ return b.cnt-a.cnt; });
+  if(!rows.length){ $('#statList').innerHTML='<div class="empty">还没有数据</div>'; return; }
+  var max=rows[0].cnt;
+  var h='';
+  rows.forEach(function(r,i){
+    var w=Math.round(r.cnt/max*100);
+    h+='<div class="statrow"><span class="n">'+(i+1)+'</span>';
+    h+='<span class="nm">'+esc(r.g.name)+'</span>';
+    h+='<span class="bar"><i style="width:'+w+'%"></i></span>';
+    h+='<span style="width:60px;text-align:right;color:var(--muted);font-size:14px">'+r.cnt+' 次</span>';
+    h+='<span style="width:88px;text-align:right;color:var(--faint);font-size:13px">'+esc(r.last)+'</span>';
+    h+='</div>';
+  });
+  $('#statList').innerHTML=h;
+}
+
+/* ---------- 新增 / 编辑游戏 ---------- */
+var VENUES=['会议室','开阔场地','户外','座位上'];
+var PLV=['无道具','纸笔','手机','需采购'];
+var editId=null, editProps=[];
+
+function openEditor(id, preset){
+  var g = id? gid(id) : null;
+  editId = id||null;
+  editProps = JSON.parse(JSON.stringify((g || preset || {}).props || []));
+  var v = g || preset || {name:'',cat:'破冰暖场',min:20,max:50,dur:15,venue:['开阔场地'],pl:'无道具',noise:2,move:2,shy:false,desc:'',steps:[],script:'',variants:[],pits:[]};
+  function sel(id2, opts, cur, nums){
+    return '<select class="field" id="'+id2+'">'+opts.map(function(o){
+      var val = nums? o : o;
+      return '<option value="'+esc(val)+'"'+(String(cur)===String(val)?' selected':'')+'>'+esc(nums? o : o)+'</option>';
+    }).join('')+'</select>';
+  }
+  var h='<div class="mbox"><button class="mclose" data-eclose>&times;</button>';
+  h+='<div class="mtitle">'+(g?'编辑游戏':(preset?'确认 AI 录入内容':'手动录入'))+'</div>';
+  h+='<div class="msub">'+(g?'编辑已有游戏':(preset?'AI 已按当前游戏详情模板录入，确认无误后点保存入库，也可以先修改。':'填完保存即进入游戏库'))+'</div>';
+  h+='<div class="msection"><h3>基本信息</h3><div class="egrid">';
+  h+='<div class="efield efull"><label>游戏名称</label><input class="field" id="e_name" value="'+esc(v.name)+'" placeholder="例如：气球接力赛"></div>';
+  h+='<div class="efield"><label>环节</label><select class="field" id="e_cat">'+CATS.map(function(c){ return '<option'+(v.cat===c?' selected':'')+'>'+c+'</option>'; }).join('')+'</select></div>';
+  h+='<div class="efield"><label>最少人数</label><input class="field" id="e_min" type="number" min="1" value="'+v.min+'"></div>';
+  h+='<div class="efield"><label>最多人数</label><input class="field" id="e_max" type="number" min="1" value="'+v.max+'"></div>';
+  h+='<div class="efield"><label>时长（分钟）</label><input class="field" id="e_dur" type="number" min="1" value="'+v.dur+'"></div>';
+  h+='<div class="efield"><label>道具级别</label><select class="field" id="e_pl">'+PLV.map(function(c){ return '<option'+(v.pl===c?' selected':'')+'>'+c+'</option>'; }).join('')+'</select></div>';
+  h+='<div class="efield"><label>音量</label><select class="field" id="e_noise">'+[1,2,3].map(function(n){ return '<option value="'+n+'"'+(v.noise===n?' selected':'')+'>'+NTXT[n]+'</option>'; }).join('')+'</select></div>';
+  h+='<div class="efield"><label>运动量</label><select class="field" id="e_move">'+[1,2,3].map(function(n){ return '<option value="'+n+'"'+(v.move===n?' selected':'')+'>'+MTXT[n]+'</option>'; }).join('')+'</select></div>';
+  h+='<div class="efield efull"><label>适用场地</label><div class="checks" id="e_venue">'+VENUES.map(function(x){ return '<label><input type="checkbox" value="'+x+'"'+((v.venue||[]).indexOf(x)>=0?' checked':'')+'>'+x+'</label>'; }).join('')+'</div></div>';
+  h+='<div class="efield efull"><label>其他</label><div class="checks"><label><input type="checkbox" id="e_shy"'+(v.shy?' checked':'')+'>社恐友好（不用被迫表演、不会被单独cue）</label></div></div>';
+  h+='<div class="efield efull"><label>一句话简介</label><textarea class="field" id="e_desc" rows="2">'+esc(v.desc)+'</textarea></div>';
+  h+='</div></div>';
+  h+='<div class="msection"><h3>规则分步</h3><textarea class="field" id="e_steps" rows="6" placeholder="一行一步">'+esc((v.steps||[]).join('\n'))+'</textarea><div class="ehint">一行一步，保存后自动编号</div></div>';
+  h+='<div class="msection"><h3>变体玩法</h3><textarea class="field" id="e_variants" rows="3" placeholder="一行一条">'+esc((v.variants||[]).join('\n'))+'</textarea></div>';
+  h+='<div class="msection"><h3>踩坑提醒</h3><textarea class="field" id="e_pits" rows="3" placeholder="一行一条">'+esc((v.pits||[]).join('\n'))+'</textarea></div>';
+  h+='<div class="msection"><h3>道具清单</h3><div id="e_props"></div><button class="btn sm" id="e_addprop" style="margin-top:8px">添加一项</button>';
+  h+='<div class="ehint">勾了「需采购」的会进道具采购清单并计入预算；办公室现成的只做提醒。</div></div>';
+  h+='<div class="mafoot"><button class="btn primary" id="e_save">保存</button><button class="btn" data-eclose>取消</button>';
+  if(g) h+='<button class="btn" id="e_del">删除这个游戏</button>';
+  h+='</div></div>';
+  var m=$('#modal'); m.innerHTML=h; m.hidden=false; document.body.style.overflow='hidden';
+  renderEditorProps();
+}
+function renderEditorProps(){
+  var el=$('#e_props'); if(!el) return;
+  var h='';
+  editProps.forEach(function(p,i){
+    h+='<div class="prow">';
+    h+='<input class="field pn" type="text" placeholder="名称" value="'+esc(p.n)+'" data-pi="'+i+'" data-pk="n">';
+    h+='<input class="field" type="number" min="0" value="'+(+p.q||0)+'" data-pi="'+i+'" data-pk="q">';
+    h+='<input class="field pu" type="text" value="'+esc(p.u)+'" data-pi="'+i+'" data-pk="u">';
+    h+='<input class="field" type="number" min="0" step="0.1" value="'+(+p.p||0)+'" data-pi="'+i+'" data-pk="p">';
+    h+='<label style="font-size:14px;color:var(--muted);white-space:nowrap"><input type="checkbox" data-pi="'+i+'" data-pk="buy"'+(p.buy?' checked':'')+'>需采购</label>';
+    h+='<button class="del" data-premove="'+i+'">&times;</button>';
+    h+='</div>';
+  });
+  if(!editProps.length) h+='<div class="ehint">暂无道具</div>';
+  el.innerHTML=h;
+}
+function saveEditor(){
+  var name=$('#e_name').value.trim();
+  if(!name){ alert('游戏名称不能为空。'); return; }
+  function lines(id){ return $('#'+id).value.split('\n').map(function(x){ return x.trim(); }).filter(Boolean); }
+  var venues=[]; document.querySelectorAll('#e_venue input:checked').forEach(function(x){ venues.push(x.value); });
+  var obj={
+    name:name,
+    cat:$('#e_cat').value,
+    min:Math.max(1, +$('#e_min').value||1),
+    max:Math.max(1, +$('#e_max').value||1),
+    dur:Math.max(1, +$('#e_dur').value||5),
+    venue: venues.length? venues : ['会议室'],
+    pl:$('#e_pl').value,
+    noise:+$('#e_noise').value,
+    move:+$('#e_move').value,
+    shy:$('#e_shy').checked,
+    desc:$('#e_desc').value.trim(),
+    steps:lines('e_steps'),
+    variants:lines('e_variants'),
+    pits:lines('e_pits'),
+    props: editProps.filter(function(p){ return p.n && String(p.n).trim(); }).map(function(p){
+      return {n:String(p.n).trim(), q:Math.max(1,+p.q||1), u:p.u||'个', buy:!!p.buy, p:+p.p||0};
+    })
+  };
+  if(obj.max<obj.min) obj.max=obj.min;
+  if(editId){
+    if(isCustom(editId)){
+      for(var i=0;i<state.user.length;i++) if(state.user[i].id===editId) state.user[i]=Object.assign({}, gid(editId), obj);
+    } else { state.edits[editId]=obj; }
+  } else {
+    obj.id='u_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    state.user.push(obj);
+  }
+  save(); closeModal(); refreshAll();
+}
+function purgeGame(id){
+  state.stars=state.stars.filter(function(x){ return x!==id; });
+  state.logs.forEach(function(l){ l.gids=l.gids.filter(function(x){ return x!==id; }); });
+  state.cur.items=state.cur.items.filter(function(it){ return it.gid!==id; });
+  if(state.hidden.indexOf(id)<0) state.hidden.push(id);
+}
+function delGameFromLib(id){
+  if(!confirm('删除这个游戏？将无法恢复。')) return;
+  purgeGame(id);
+  state.user=state.user.filter(function(g){ return g.id!==id; });
+  save(); renderLib(); renderPlan();
+}
+function refreshAll(){
+  renderLib(); renderLogs(); renderStats(); renderLogQueryOpts(); renderLogQuery(); renderPlan();
+}
+$('#modal').addEventListener('click', function(e){
+  if(!$('#e_save')) return;
+  if(e.target.closest('[data-eclose]')){ closeModal(); return; }
+  if(e.target.id==='e_addprop'){ editProps.push({n:'',q:1,u:'个',buy:false,p:0}); renderEditorProps(); return; }
+  var pr=e.target.closest('[data-premove]');
+  if(pr){ editProps.splice(+pr.getAttribute('data-premove'),1); renderEditorProps(); return; }
+  if(e.target.id==='e_save'){ saveEditor(); return; }
+  if(e.target.id==='e_del'){
+    if(!confirm('删除这个自定义游戏？将无法恢复。')) return;
+    purgeGame(editId); state.user=state.user.filter(function(g){ return g.id!==editId; });
+    save(); closeModal(); refreshAll(); return;
+  }
+});
+$('#modal').addEventListener('input', function(e){
+  var t=e.target, pi=t.getAttribute && t.getAttribute('data-pi');
+  if(pi==null) return;
+  var i=+pi, k=t.getAttribute('data-pk');
+  if(k==='buy') editProps[i].buy=t.checked;
+  else if(k==='q') editProps[i].q=Math.max(0,+t.value||0);
+  else if(k==='p') editProps[i].p=Math.max(0,+t.value||0);
+  else editProps[i][k]=t.value;
+});
+$('#modal').addEventListener('click', function(e){
+  var ed=e.target.closest('[data-medit]');
+  if(ed){ openEditor(ed.getAttribute('data-medit')); return; }
+  var hd=e.target.closest('[data-mhide]');
+  if(hd){
+    var id=hd.getAttribute('data-mhide');
+    if(!confirm('删除这个游戏？将无法恢复。')) return;
+    purgeGame(id); state.user=state.user.filter(function(g){ return g.id!==id; });
+    save(); closeModal(); refreshAll(); return;
+  }
+});
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+$('#btnNewGame').addEventListener('click', function(){ openEditor(null); });
+
+/* ---------- 设置（AI 配置） ---------- */
+function openSettings(){
+  var a=state.ai;
+  var h='<div class="mbox"><button class="mclose">&times;</button>';
+  h+='<div class="mtitle">设置</div>';
+  h+='<div class="msub">配置 AI 接口，用于「AI 导入游戏」：把文字 / 图片一键变成标准游戏条目。</div>';
+  h+='<div class="msection"><div class="egrid">';
+  h+='<div class="efield efull"><label>API 地址（Base URL）</label><input class="field" id="s_url" value="'+esc(a.url)+'" placeholder="https://ai666.live/v1"></div>';
+  h+='<div class="efield efull"><label>API KEY</label><input class="field" id="s_key" type="password" autocomplete="off" value="'+esc(a.key)+'" placeholder="sk-..."></div>';
+  h+='<div class="efield efull"><label>模型名称</label><input class="field" id="s_model" value="'+esc(a.model)+'" placeholder="gpt-5.6-sol"></div>';
+  h+='</div></div>';
+  h+='<div class="msection"><h3>多设备同步</h3>';
+  h+='<div class="efield efull"><label>GitHub Token（只需本机保存，不会进入网页源码）</label><input class="field" id="s_token" type="password" autocomplete="off" value="'+esc(state.sync.token)+'" placeholder="ghp_..."></div>';
+  h+='<div class="ehint">填入有 repo 权限的 token 并保存后，本机数据自动同步到你的私有仓库 '+SYNC_REPO+'，其他设备打开本页后在设置里填同一个 token 即可拿到全部数据。修改后约 1.5 秒自动上传，每 30 秒自动拉取。</div></div>';
+  h+='<div class="mafoot"><button class="btn primary" id="s_save">保存</button><button class="btn" id="s_test">测试连接</button><button class="btn" id="s_sync">立即同步</button><span id="s_result" style="font-size:14px;color:var(--muted);align-self:center"></span></div></div>';
+  var m=$('#modal'); m.innerHTML=h; m.hidden=false; document.body.style.overflow='hidden';
+}
+function readAISettings(){
+  state.ai.url=$('#s_url').value.trim()||AI_DEF.url;
+  state.ai.key=$('#s_key').value.trim();
+  state.ai.model=$('#s_model').value.trim()||AI_DEF.model;
+  if($('#s_token')) state.sync.token=$('#s_token').value.trim();
+}
+function aiBase(){ return state.ai.url.replace(/\/+$/,'')+'/chat/completions'; }
+function aiErrText(err){
+  var m=(err && err.message) || String(err);
+  if(m.indexOf('Failed to fetch')>=0){
+    if(location.pathname.indexOf('/static-html/')>=0)
+      return '当前 WorkBuddy 内置预览禁止连接外部 AI 接口（CSP 限制），与代理、URL、KEY 和模型无关。请使用交付的 localhost 本地运行地址打开本工具后再测试。';
+    return '浏览器无法连接 AI 接口。请检查代理规则、浏览器扩展或网络连接后重试。';
+  }
+  return m;
+}
+function aiChat(messages){
+  return fetch(aiBase(), {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.ai.key},
+    body: JSON.stringify({model:state.ai.model, messages:messages})
+  }).then(function(res){
+    if(!res.ok){
+      return res.text().catch(function(){ return ''; }).then(function(t){
+        throw new Error('HTTP '+res.status+(t?' · '+t.slice(0,160):''));
+      });
+    }
+    return res.json().then(function(j){
+      var txt=j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      if(!txt) throw new Error('响应里没有内容');
+      return txt;
+    });
+  });
+}
+$('#btnSettings').addEventListener('click', openSettings);
+$('#modal').addEventListener('click', function(e){
+  if(e.target.id==='s_save'){ readAISettings(); rawSave(); closeModal(); updateDot(); startSyncLoop(); syncPush(); return; }
+  if(e.target.id==='s_sync'){
+    readAISettings(); rawSave();
+    var r2=$('#s_result'); r2.textContent='同步中…'; r2.style.color='var(--muted)';
+    syncPull(function(){ r2.textContent='已拉取云端最新数据'; r2.style.color='var(--green)'; });
+    syncPush();
+    return;
+  }
+  if(e.target.id==='s_test'){
+    readAISettings();
+    var r=$('#s_result'); r.textContent='测试中…'; r.style.color='var(--muted)';
+    aiChat([{role:'user',content:'请只回复两个字：正常'}]).then(function(txt){
+      r.textContent='连接成功 · '+txt.trim().slice(0,24); r.style.color='var(--green)';
+    }).catch(function(err){
+      r.textContent='连接失败：'+aiErrText(err); r.style.color='var(--red)';
+    });
+    return;
+  }
+});
+
+/* ---------- AI自动录入 ---------- */
+var aiImgs=[];
+var XHS_RE=/https?:\/\/(www\.)?(xiaohongshu\.com|xhslink\.com)\/[\w\-./?=&%]+/i;
+function openAiImport(){
+  aiImgs=[];
+  var h='<div class="mbox" id="ai_box"><button class="mclose">&times;</button>';
+  h+='<div class="mtitle">AI自动录入</div>';
+  h+='<div class="msub">粘贴玩法文字、小红书笔记链接，或把图片直接拖进这个窗口（也可 Ctrl+V 粘贴截图）。AI 按模板生成标准条目，确认后加入游戏库。</div>';
+  h+='<div class="msection"><div class="efield"><label>玩法描述 / 小红书链接（可直接粘贴群聊记录、攻略）</label>';
+  h+='<textarea class="field" id="ai_text" rows="7" placeholder="例如：我们在团建玩了一个游戏…规则是…&#10;或直接粘贴小红书笔记链接：https://www.xiaohongshu.com/explore/xxxx"></textarea></div></div>';
+  h+='<div class="msection"><div class="efield"><label>配图（可拖入 / 粘贴 / 点击添加，会一并发给 AI 识别）</label>';
+  h+='<div class="tbtns" style="margin-top:8px"><button class="btn sm" id="ai_pickimg">添加图片</button><input type="file" id="ai_files" accept="image/*" multiple hidden></div>';
+  h+='<div class="chips" id="ai_thumbs" style="margin-top:12px"></div></div></div>';
+  h+='<div class="mafoot"><button class="btn primary" id="ai_go">AI 生成游戏</button><span id="ai_status" style="font-size:14px;color:var(--muted);align-self:center"></span></div></div>';
+  var m=$('#modal'); m.innerHTML=h; m.hidden=false; document.body.style.overflow='hidden';
+  renderAiThumbs();
+}
+function addAiFiles(fs){
+  fs=fs.filter(function(f){ return f.type && f.type.indexOf('image/')===0; });
+  if(!fs.length) return;
+  Promise.all(fs.map(function(f){
+    return new Promise(function(done){
+      var r=new FileReader(); r.onload=function(){ aiImgs.push(r.result); done(); }; r.readAsDataURL(f);
+    });
+  })).then(renderAiThumbs);
+}
+function renderAiThumbs(){
+  var el=$('#ai_thumbs'); if(!el) return;
+  el.innerHTML=aiImgs.map(function(u,i){
+    return '<span class="aithumb"><img src="'+u+'" alt=""><button data-aimgrm="'+i+'" title="移除">&times;</button></span>';
+  }).join('') || '<span style="font-size:14px;color:var(--faint)">还没添加图片</span>';
+}
+$('#btnAiImport').addEventListener('click', openAiImport);
+$('#modal').addEventListener('change', function(e){
+  if(e.target.id!=='ai_files') return;
+  addAiFiles(Array.prototype.slice.call(e.target.files||[]));
+  e.target.value='';
+});
+$('#modal').addEventListener('dragover', function(e){
+  if(!$('#ai_text')) return;
+  e.preventDefault(); if(e.dataTransfer) e.dataTransfer.dropEffect='copy';
+  var box=$('#ai_box'); if(box) box.classList.add('dropping');
+});
+$('#modal').addEventListener('dragleave', function(e){
+  if(e.target!==$('#modal')) return;
+  var box=$('#ai_box'); if(box) box.classList.remove('dropping');
+});
+$('#modal').addEventListener('drop', function(e){
+  var box=$('#ai_box'); if(box) box.classList.remove('dropping');
+  if(!$('#ai_text')) return;
+  e.preventDefault();
+  var fs=Array.prototype.slice.call((e.dataTransfer&&e.dataTransfer.files)||[]);
+  if(fs.length) addAiFiles(fs);
+});
+$('#modal').addEventListener('paste', function(e){
+  if(!$('#ai_text')) return;
+  var items=e.clipboardData && e.clipboardData.items; if(!items) return;
+  var fs=[];
+  for(var i=0;i<items.length;i++){
+    if(items[i].kind==='file' && items[i].type.indexOf('image/')===0){
+      var f=items[i].getAsFile(); if(f) fs.push(f);
+    }
+  }
+  if(fs.length){ e.preventDefault(); addAiFiles(fs); }
+});
+$('#modal').addEventListener('click', function(e){
+  var rm=e.target.closest('[data-aimgrm]');
+  if(rm){ aiImgs.splice(+rm.getAttribute('data-aimgrm'),1); renderAiThumbs(); return; }
+  if(e.target.id==='ai_pickimg'){ $('#ai_files').click(); return; }
+  if(e.target.id==='ai_go'){ aiGenerate(); return; }
+});
+function aiParseJSON(raw){
+  var s=String(raw).trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  var a=s.indexOf('{'), b=s.lastIndexOf('}');
+  if(a<0||b<0) throw new Error('AI 没有返回 JSON');
+  return JSON.parse(s.slice(a,b+1));
+}
+function normalizeAI(o){
+  var cats=['破冰暖场','分组对抗','爆笑整蛊','协作挑战','温情收尾'];
+  var vens=['会议室','开阔场地','户外','座位上'];
+  var pls=['无道具','纸笔','手机','需采购'];
+  function int(x,d){ x=+x; return isFinite(x)&&x>0? Math.round(x):d; }
+  var g={
+    name:String(o.name||'AI 新游戏').slice(0,30),
+    cat:cats.indexOf(o.cat)>=0? o.cat : '破冰暖场',
+    min:int(o.min,5), max:int(o.max,50),
+    dur:int(o.dur,15),
+    venue:Array.isArray(o.venue)? o.venue.filter(function(x){return vens.indexOf(x)>=0;}) : [],
+    pl:pls.indexOf(o.pl)>=0? o.pl : '无道具',
+    props:Array.isArray(o.props)? o.props.map(function(p){ return {n:String(p&&p.n||''), q:int(p&&p.q,1), u:String(p&&p.u||'个'), buy:!!(p&&p.buy), p:+(p&&p.p)||0}; }).filter(function(p){return p.n;}) : [],
+    noise:[1,2,3].indexOf(+o.noise)>=0? +o.noise : 2,
+    move:[1,2,3].indexOf(+o.move)>=0? +o.move : 2,
+    shy:!!o.shy,
+    desc:String(o.desc||'').slice(0,120),
+    steps:Array.isArray(o.steps)? o.steps.map(String) : [],
+    variants:Array.isArray(o.variants)? o.variants.map(String) : [],
+    pits:Array.isArray(o.pits)? o.pits.map(String) : []
+  };
+  if(!g.venue.length) g.venue=['开阔场地'];
+  if(!g.steps.length) g.steps=['根据现场人数完成分组或站位','主持人说明目标、顺序和判定方式','所有参与者按规则完成游戏','达到结束条件后公布结果'];
+  if(!g.variants.length) g.variants=['根据现场人数调整分组和轮次'];
+  if(!g.pits.length) g.pits=['开始前确认场地安全，并完整讲解规则'];
+  if(g.max<g.min) g.max=g.min;
+  return g;
+}
+function fetchXHS(url){
+  return fetch('https://r.jina.ai/'+url).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.text();
+  });
+}
+function aiGenerate(){
+  var text=$('#ai_text')? $('#ai_text').value.trim() : '';
+  var st=$('#ai_status'), go=$('#ai_go');
+  if(!text && !aiImgs.length){ st.textContent='先输入文字 / 链接，或拖入图片。'; return; }
+  var m=text.match(XHS_RE);
+  if(m){
+    st.textContent='正在读取小红书笔记…'; st.style.color='var(--muted)'; go.disabled=true;
+    fetchXHS(m[0]).then(function(md){
+      var imgs=[], re=/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/g, mm;
+      while((mm=re.exec(md)) && imgs.length<6) imgs.push(mm[1]);
+      var clean=md.replace(/!\[[^\]]*\]\([^)]*\)/g,'').replace(/\n{3,}/g,'\n\n').trim().slice(0,6000);
+      if(!clean) clean='（未能提取到笔记正文）';
+      var extra=text.replace(m[0],'').trim();
+      st.textContent='笔记读取成功，AI 生成中…';
+      doGenerate('【小红书笔记原文】\n'+clean+(extra?'\n\n【用户补充】'+extra:''), imgs);
+    }).catch(function(err){
+      go.disabled=false;
+      st.textContent='读取小红书失败（'+(err.message||'网络不通')+'，读取服务国内直连可能被墙，开代理后可重试）。也可以直接把笔记文字复制粘贴过来，或把笔记截图拖进来。';
+      st.style.color='var(--red)';
+    });
+    return;
+  }
+  doGenerate(text, []);
+}
+function doGenerate(text, extraUrls){
+  var st=$('#ai_status'), go=$('#ai_go');
+  if(!st){ closeModal(); return; }
+  st.textContent='AI 生成中，可能需要十几秒…'; st.style.color='var(--muted)'; go.disabled=true;
+  var sys='你是公司生日会游戏策划。请把用户提供的文字和图片整理成一个适合公司生日会的团体游戏，并严格匹配当前游戏详情页的字段和展示顺序。只输出一个 JSON 对象，不要 markdown 代码块，不要解释。模板顺序和字段如下：'
+    +'【基本信息】name(游戏名,不超过12字),cat(环节,只能是破冰暖场/分组对抗/爆笑整蛊/协作挑战/温情收尾),min(最少人数数字),max(最多人数数字),dur(时长分钟数字),venue(适用场地数组,只能取会议室/开阔场地/户外/座位上),pl(道具级别,只能取无道具/纸笔/手机/需采购),noise(音量数字1安静/2中等/3吵闹),move(运动量数字1原地/2走动/3跑动),shy(社恐友好布尔),desc(一句话简介,不超过40字)；'
+    +'【游戏规则】steps(规则分步字符串数组,必须4-6步,每步一句话,内容要能直接复制到 PPT)；'
+    +'【变体玩法】variants(字符串数组,2-3条)；【踩坑提醒】pits(字符串数组,1-3条)；【道具清单】props(数组,每项{n:名称,q:数量数字,u:单位,buy:是否需采购布尔,p:单价数字})。不要生成主持人口播字段。所有字段都必须返回，不能省略。';
+  var content=[{type:'text',text: text || '请根据图片内容设计一个生日会游戏'}];
+  aiImgs.forEach(function(u){ content.push({type:'image_url',image_url:{url:u}}); });
+  (extraUrls||[]).forEach(function(u){ content.push({type:'image_url',image_url:{url:u}}); });
+  aiChat([{role:'system',content:sys},{role:'user',content:content}]).then(function(raw){
+    var obj=normalizeAI(aiParseJSON(raw));
+    closeModal();
+    openEditor(null, obj);
+  }).catch(function(err){
+    st.textContent='生成失败：'+aiErrText(err); st.style.color='var(--red)'; go.disabled=false;
+  });
+}
+
+/* ---------- 云端同步（GitHub 私有仓库） ---------- */
+function b64e(s){ return btoa(unescape(encodeURIComponent(s))); }
+function b64d(s){ try{ return decodeURIComponent(escape(atob(s))); }catch(e){ return ''; } }
+function syncOn(){ return !!(state.sync && state.sync.token); }
+function ghHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+state.sync.token,'Accept':'application/vnd.github+json'}; }
+function setDot(mode){
+  var d=$('#syncDot'); if(!d) return;
+  var m={off:['#c7c7cc','同步未配置'],ok:['#34c759','已同步到云端'],ing:['#ff9500','云端同步中…'],err:['#ff3b30','云端同步失败，点设置查看']};
+  var v=m[mode]||m.off;
+  d.style.background=v[0]; d.title=v[1]+(state.sync.lastSync?(' · 最近同步 '+new Date(state.sync.lastSync).toLocaleTimeString()):'');
+}
+function updateDot(){ setDot(syncOn()? 'ok' : 'off'); }
+var syncTimer=null, syncing=false, pullTimer=null;
+function scheduleSync(){
+  if(!syncOn()){ updateDot(); return; }
+  clearTimeout(syncTimer); setDot('ing');
+  syncTimer=setTimeout(syncPush, 1500);
+}
+function syncPush(){
+  if(!syncOn() || syncing) return;
+  syncing=true; setDot('ing');
+  var payload=Object.assign({}, state); delete payload.sync;
+  payload._ts=Date.now(); state._ts=payload._ts;
+  var body={message:'sync '+new Date().toISOString(), content:b64e(JSON.stringify(payload)), branch:'main'};
+  fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {method:'GET', headers:ghHeaders()})
+  .then(function(r){ return r.json(); })
+  .then(function(old){ if(old && old.sha) body.sha=old.sha;
+    return fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {method:'PUT', headers:ghHeaders(), body:JSON.stringify(body)});
+  })
+  .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(function(){ syncing=false; state.sync.lastSync=Date.now(); rawSave(); setDot('ok'); })
+  .catch(function(){ syncing=false; setDot('err'); });
+}
+function syncPull(then){
+  if(!syncOn()) return Promise.resolve();
+  return fetch('https://api.github.com/repos/'+SYNC_REPO+'/contents/state.json', {headers:ghHeaders()})
+  .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(function(j){
+    if(!j || !j.content) return;
+    var remote; try{ remote=JSON.parse(b64d(j.content)); }catch(e){ return; }
+    if(!remote || (remote._ts||0) <= (state._ts||0)) return;
+    ['stars','logs','user','edits','hidden'].forEach(function(k){ if(remote[k]!==undefined) state[k]=remote[k]; });
+    if(remote.cur) state.cur=Object.assign({id:'',name:'',who:'',date:'',people:'',items:[]}, remote.cur);
+    if(remote.ai) state.ai=Object.assign({}, state.ai, remote.ai);
+    state._ts=remote._ts||Date.now(); state.sync.lastSync=Date.now();
+    rawSave(); syncPlanInputs(); refreshAll();
+    if(then) then();
+  })
+  .catch(function(){ setDot('err'); });
+}
+function startSyncLoop(){
+  if(!syncOn()) return;
+  syncPull();
+  clearInterval(pullTimer);
+  pullTimer=setInterval(function(){ if(!document.hidden && !syncing) syncPull(); }, 30000);
+  window.addEventListener('focus', function(){ if(!syncing) syncPull(); });
+}
+
+/* ---------- 视图切换 ---------- */
+document.querySelector('.tabs').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  var v=b.getAttribute('data-view');
+  document.querySelectorAll('.tabs button').forEach(function(x){ x.classList.remove('on'); });
+  b.classList.add('on');
+  ['lib','plan','log'].forEach(function(k){ $('#view-'+k).hidden = (k!==v); });
+  if(v==='plan') renderPlan();
+  if(v==='log'){ renderLogQueryOpts(); renderLogQuery(); renderLogs(); renderStats(); }
+});
+
+/* ---------- 启动 ---------- */
+load();
+syncPlanInputs();
+renderLogQueryOpts();
+renderLib();
+renderPlan();
+renderLogQuery();
+renderLogs();
+renderStats();
+updateDot();
+startSyncLoop();
+</script>
+</body>
+</html>
