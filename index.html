@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230071e3'/%3E%3Crect x='15' y='27' width='34' height='23' rx='4' fill='%23fff'/%3E%3Crect x='12' y='21' width='40' height='8' rx='3' fill='%23ff9500'/%3E%3Crect x='29' y='21' width='6' height='29' fill='%23ff2d55'/%3E%3Ccircle cx='25' cy='16' r='6' fill='%23ff2d55'/%3E%3Ccircle cx='39' cy='16' r='6' fill='%23ff2d55'/%3E%3Ccircle cx='32' cy='19' r='3.2' fill='%2334c759'/%3E%3C/svg%3E">
 <title>绿怡生日会工作台</title>
 <style>
 :root{
@@ -179,21 +181,59 @@ textarea.field{resize:vertical;min-height:64px;line-height:1.6}
 .ehint{font-size:13px;color:var(--faint);margin-top:6px;line-height:1.6}
 
 @media (max-width:860px){
-  .plan-body{grid-template-columns:1fr}
+  .plan-body{grid-template-columns:1fr;gap:12px}
   .pside{position:static}
 }
 @media (max-width:640px){
   .wrap{padding:0 16px}
-  h1{font-size:22px}
-  .hdr-right{width:100%;flex-wrap:wrap}
-  .tabs{width:100%;margin-top:14px}
-  .tabs button{flex:1;padding:8px 6px;font-size:15px}
+  /* header */
+  .header-inner{padding-top:14px;padding-bottom:12px;gap:10px}
+  h1{font-size:21px}
+  .logo{width:36px;height:36px}
+  .brand{gap:10px}
+  /* header：同步点+齿轮并入标题行，tabs 独占第二行 */
+  .hdr-right{display:contents}
+  #syncDot{order:1;margin:0 4px 0 auto !important;align-self:center}
+  .gearbtn{order:2}
+  .tabs{order:3;flex-basis:100%;width:100%;margin-top:10px}
+  .tabs button,.tabs .tab-link{flex:1;padding:8px 4px;font-size:14px;white-space:nowrap}
+  .gearbtn{width:36px;height:36px}
+  /* layout */
+  main.wrap{padding-top:18px;padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+  h2{font-size:17px}
+  .card{padding:18px 16px;border-radius:16px}
+  /* filters */
+  .filters{padding:2px 14px 14px;border-radius:16px}
+  .filter-bar{padding:12px 0;gap:10px}
+  .filter-summary{flex:1 1 100%}
+  .filter-bar .field{flex:1;min-width:0;max-width:none}
   .frow{flex-direction:column;gap:8px}
   .flabel{padding-top:0;font-size:14px}
-  .grid{grid-template-columns:1fr}
-  .mbox{padding:22px 18px;border-radius:14px}
-  .mtitle{font-size:21px}
-  .modal{padding:16px 10px}
+  .chip{padding:6px 13px;font-size:14px}
+  /* toolbar + grid */
+  .toolbar{margin-bottom:16px;gap:10px}
+  .tbtns{width:100%}
+  .tbtns .btn{flex:1;justify-content:center}
+  .btn{padding:10px 16px}
+  .grid{grid-template-columns:1fr;gap:12px}
+  .gcard{padding:16px}
+  .gname{font-size:17px}
+  /* modal */
+  .modal{padding:14px 8px}
+  .mbox{padding:22px 16px 26px;border-radius:16px}
+  .mtitle{font-size:20px}
+  .mclose{top:12px;right:14px;font-size:24px}
+  .msection{margin-top:20px}
+  .mtext,ol.steps li,ul.plain li{font-size:15px}
+  /* plan */
+  .plan-head .full{flex-wrap:wrap}
+  .plan-item{gap:10px}
+  .pname{font-size:16px}
+  .pidx{width:24px;height:24px;font-size:13px}
+  .iconbtn{width:34px;height:34px}
+  /* log */
+  .statrow .bar{width:80px}
+  .ptable{font-size:14px}
   .mafoot .btn{flex:1;justify-content:center}
 }
 </style>
