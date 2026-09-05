@@ -388,7 +388,7 @@ var GAMES = [];
 var KEY = 'bgh_v1';
 var SYNC_DEFAULT = 'lyi-2026';  /* 内置默认同步码：新设备无需填写，打开即自动全量同步 */
 var AI_DEF = {url:'https://ai666.live/v1', key:'sk-FcfEByqfiggSPxsN9BfRnqNmrHCQpVn33kRf3zLkVC9ekjA6', model:'gpt-5.6-sol'};
-var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',theme:'',who:'',date:'',people:'',items:[],scriptReq:'',script:'',aiPlan:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model,scriptPresets:['warm','time','link','ending'],scriptCustom:''}, sync:{code:SYNC_DEFAULT, lastSync:0}, _ts:0};
+var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',theme:'',who:'',date:'',people:'',items:[],scriptReq:'',script:'',aiPlanReq:'',aiPlan:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model,scriptPresets:['warm','time','link','ending'],scriptCustom:''}, sync:{code:SYNC_DEFAULT, lastSync:0}, _ts:0};
 function ico(name){
   var p={search:'<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',filter:'<path d="M4 5h16M7 12h10M10 19h4"/>',plus:'<path d="M12 5v14M5 12h14"/>',spark:'<path d="m12 3 1.7 6.3L20 11l-6.3 1.7L12 19l-1.7-6.3L4 11l6.3-1.7L12 3Z"/>',eye:'<path d="M2.5 12s3.3-5 9.5-5 9.5 5 9.5 5-3.3 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/>',trash:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>',copy:'<rect x="8" y="8" width="11" height="12" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h8"/>',edit:'<path d="m4 16-.8 4.8L8 20l11-11a2.8 2.8 0 0 0-4-4L4 16Z"/>',save:'<path d="M5 4h12l3 3v13H5zM8 4v6h8V4M8 20v-6h8v6"/>',image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 3 3 2-2 6 5"/>',refresh:'<path d="M20 11a8 8 0 0 0-14.7-4L3 10M3 5v5h5M4 13a8 8 0 0 0 14.7 4L21 14m0 5v-5h-5"/>',arrowUp:'<path d="m6 14 6-6 6 6"/>',arrowDown:'<path d="m6 10 6 6 6-6"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>'};
   return '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">'+(p[name]||'')+'</svg>';
@@ -1205,18 +1205,19 @@ function normalizePlanResult(raw, pending){
       if(total>0){gp.groups=groups;gp.participants=Math.min(planPeople(),total);}
       gp.mode=String(a.mode||gp.mode);gp.awards=Math.max(0,+a.awards||0);gp.notes=String(a.notes||gp.notes);
     }
-    return {role:role.k,title:role.title,desc:role.desc,gameId:id,reason:String(x.reason||'根据本次生日会信息匹配'),participants:gp.participants,mode:gp.mode,groups:gp.groups,awards:gp.awards,notes:gp.notes,status:'pending'};
+    return {role:role.k,title:role.title,desc:role.desc,gameId:id,reason:String(x.reason||'根据本次生日会信息匹配'),rule:String(x.rule||((g&&g.steps&&g.steps.length)?g.steps.join('；'):'按游戏规则进行')),selection:String(x.selection||x.selectionAdvice||'由主持人按上述参与方式现场选择人员'),participants:gp.participants,mode:gp.mode,groups:gp.groups,awards:gp.awards,notes:gp.notes,status:'pending'};
   });
 }
 function planPrompt(pending){
   var c=state.cur,n=planPeople(), existing=(c.aiPlan||[]).filter(function(p){return p.status==='accepted';}).map(function(p){return p.gameId;});
   var games=ALL().filter(function(g){return existing.indexOf(g.id)<0;}).map(function(g){return {id:g.id,name:g.name,cat:g.cat,min:g.min,max:g.max,dur:g.dur,venue:g.venue,noise:g.noise,move:g.move,desc:g.desc,steps:g.steps,props:g.props,variants:g.variants};});
   return '请为一场生日会从给定游戏库中匹配方案。生日会信息：主题 '+(c.theme||'未填写')+'，名称 '+(c.name||'未填写')+'，人数 '+n+' 人，日期 '+(c.date||'未填写')+'。\n'
+    +'用户本次补充要求：'+(c.aiPlanReq||'无')+'。必须优先满足这段要求。\n'
     +'只为以下未确定位置返回方案：'+pending.map(function(r){return r.k+'（'+r.desc+'）';}).join('、')+'。\n'
     +'参与人数原则：第一个 warm 尽量让更多人参与；第二个 team 按游戏规则正常安排，不强求每个人参加；第三个 fun 尽量让更多人参与，但允许观摩、计分或轮换。绝对不能为了凑人数简单平均分组。\n'
     +'已经接受的游戏不能重复：'+(existing.join(',')||'无')+'。\n游戏库 JSON：'+JSON.stringify(games)+'\n'
-    +'请严格只返回 JSON，不要 markdown：{"plans":[{"role":"warm/team/fun","gameId":"游戏库中的id","reason":"不超过50字的匹配理由","arrangement":{"mode":"具体参与方式","participants":数字,"groups":[{"name":"A组或主持人指定","people":数字,"task":"这一组具体怎么做"}],"awards":数字,"notes":"未参与人员如何观摩/计分/轮换"}}]}。每个 role 只能一个，gameId 必须来自游戏库。\n'
-    +'你必须先读懂该游戏的 steps、desc、props 和 variants，再决定 participants、groups、每组人数、每组任务、奖励份数。groups 中的人数总和必须等于 participants；如果游戏不是分组对抗，可以只有一个参与队伍或按规则轮换。奖励份数必须符合游戏规则，不要默认每组一份。\n'
+    +'请严格只返回 JSON，不要 markdown：{"plans":[{"role":"warm/team/fun","gameId":"游戏库中的id","reason":"不超过50字的匹配理由","rule":"只写一次的简明游戏规则，80字内","selection":"具体选人建议，可包含性别比例、衣服颜色、座位区域、随机/自愿等，不要歧视或强制","arrangement":{"mode":"具体参与方式","participants":数字,"groups":[{"name":"A组或主持人指定","people":数字,"task":"这一组具体怎么做"}],"awards":数字,"notes":"未参与人员如何观摩/计分/轮换"}}]}。每个 role 只能一个，gameId 必须来自游戏库。\n'
+    +'你必须先读懂该游戏的 steps、desc、props 和 variants，再决定 rule、selection、participants、groups、每组人数、每组任务、奖励份数。groups 中的人数总和必须等于 participants；如果游戏不是分组对抗，可以只有一个参与队伍或按规则轮换。奖励份数必须符合游戏规则，不要默认每组一份。\n'
     +'匹配原则：warm 优先破冰暖场且低门槛；team 优先协作挑战或分组对抗；fun 优先爆笑整蛊且轻松。';
 }
 function renderPlanGroups(p){
@@ -1226,25 +1227,52 @@ function renderPlanGroups(p){
 }
 function planCard(p){
   var g=gid(p.gameId), stateClass=p.status==='accepted'?' accepted':(p.status==='rejected'?' rejected':'');
-  var h='<div class="ai-plan-card'+stateClass+'"><div class="ai-plan-top"><div><div class="ai-plan-role">'+esc(p.title)+(p.status==='accepted'?' · 已接受':(p.status==='rejected'?' · 不接受':''))+'</div>';
+  var h='<div class="ai-plan-card'+stateClass+'" data-plan-card="'+esc(p.role)+'"><div class="ai-plan-top"><div><div class="ai-plan-role">'+esc(p.title)+(p.status==='accepted'?' · 已接受':(p.status==='rejected'?' · 不接受':''))+'</div>';
   h+='<div class="ai-plan-name">'+esc(g?g.name:'暂未匹配')+'</div></div>';
   if(g) h+='<span class="tag" style="'+catStyle(g.cat)+'">'+esc(g.cat)+'</span>';
-  h+='</div><div class="ai-plan-reason">'+esc(p.reason||p.desc)+'</div>';
-  h+='<div class="ai-plan-meta">'+esc(renderPlanGroups(p))+'</div>';
-  if(p.status==='pending') h+='<div class="ai-plan-actions"><button class="btn primary" data-plan-accept="'+esc(p.role)+'">接受</button><button class="btn" data-plan-reject="'+esc(p.role)+'">不接受</button></div>';
+  h+='</div><div class="ai-plan-reason">匹配理由：'+esc(p.reason||p.desc)+'</div>';
+  h+='<div class="ai-plan-meta"><b>游戏规则</b>：'+esc(p.rule||'按游戏规则进行')+'</div>';
+  h+='<div class="ai-plan-meta"><b>选人建议</b>：'+esc(p.selection||'由主持人按上述参与方式现场选择人员')+'</div>';
+  h+='<div class="ai-plan-meta"><b>分组安排</b>：'+esc(renderPlanGroups(p))+'</div>';
+  if(p.status==='pending') h+='<div class="ai-plan-actions"><button class="btn primary" data-plan-accept="'+esc(p.role)+'">接受</button><button class="btn" data-plan-reject="'+esc(p.role)+'">不接受</button><button class="btn" data-plan-edit="'+esc(p.role)+'">编辑</button></div>';
+  else h+='<div class="ai-plan-actions"><button class="btn" data-plan-edit="'+esc(p.role)+'">编辑方案</button></div>';
   h+='</div>'; return h;
 }
 function openAiPlan(){
   var plans=state.cur.aiPlan||[], h='<div class="mbox" id="ap_box"><button class="mclose">&times;</button>';
   h+='<div class="mtitle">AI 策划</div><div class="msub">根据主题、人数和游戏库，为你安排一场完整的三段式流程。</div>';
   h+='<div class="msection"><div class="ehint">'+esc((state.cur.name||'未命名生日会')+' · '+(state.cur.theme||'未填写主题')+' · '+planPeople()+' 人')+'</div></div>';
+  h+='<div class="msection"><h3>本次补充要求</h3><textarea class="field" id="ap_req" rows="3" placeholder="例如：不要需要跑动的游戏；希望女生多参与；场地比较小；预算有限…">'+esc(state.cur.aiPlanReq||'')+'</textarea><div class="ehint" style="margin-top:8px">AI 会结合这段要求重新选游戏和安排参与方式。</div></div>';
   if(!plans.length) h+='<div class="ai-plan-empty">点击下方按钮，让 AI 开始匹配。</div>';
   else { h+='<div class="msection">'; plans.forEach(function(p){h+=planCard(p);}); h+='</div>'; }
   if(planMsg){h+='<div class="ehint" style="color:'+planMsg.c+'">'+esc(planMsg.t)+'</div>'; planMsg=null;}
   h+='<div class="mafoot"><button class="btn primary" id="ap_go">'+ico('spark')+(plans.length?'AI再次策划':'开始AI策划')+'</button><span id="ap_status" style="font-size:14px;color:var(--muted);align-self:center"></span></div></div>';
   var m=$('#modal');m.innerHTML=h;m.hidden=false;document.body.style.overflow='hidden';
 }
+function openPlanEditor(role){
+  var p=(state.cur.aiPlan||[]).filter(function(x){return x.role===role;})[0]; if(!p)return;
+  var h='<div class="mbox" id="ape_box" data-role="'+esc(role)+'"><button class="mclose">&times;</button><div class="mtitle">编辑策划方案</div><div class="msub">修改后会保留当前的接受/不接受状态。</div>';
+  h+='<div class="msection"><div class="efield"><label>游戏</label><select class="field" id="ape_game">'+ALL().map(function(g){return '<option value="'+esc(g.id)+'"'+(g.id===p.gameId?' selected':'')+'>'+esc(g.name)+'</option>';}).join('')+'</select></div>';
+  h+='<div class="efield"><label>匹配理由</label><input class="field" id="ape_reason" value="'+esc(p.reason||'')+'"></div>';
+  h+='<div class="efield"><label>游戏规则（只写一次）</label><textarea class="field" id="ape_rule" rows="3">'+esc(p.rule||'')+'</textarea></div>';
+  h+='<div class="efield"><label>选人建议</label><textarea class="field" id="ape_selection" rows="3" placeholder="例如：随机抽签；男生3人、女生3人；优先选穿红色/蓝色衣服的人…">'+esc(p.selection||'')+'</textarea></div>';
+  h+='<div class="efield"><label>参与方式</label><input class="field" id="ape_mode" value="'+esc(p.mode||'')+'"></div>';
+  h+='<div class="efield"><label>参与人数</label><input class="field" id="ape_participants" type="number" min="1" value="'+(+p.participants||planPeople())+'"></div>';
+  h+='<div class="efield"><label>分组安排（每行：组名｜人数｜任务）</label><textarea class="field" id="ape_groups" rows="5">'+esc((p.groups||[]).map(function(x){return (x.name||'')+'｜'+(+x.people||0)+'｜'+(x.task||'');}).join('\n'))+'</textarea></div>';
+  h+='<div class="efield"><label>奖励份数</label><input class="field" id="ape_awards" type="number" min="0" value="'+(+p.awards||0)+'"></div>';
+  h+='<div class="efield"><label>其他人员安排</label><textarea class="field" id="ape_notes" rows="2">'+esc(p.notes||'')+'</textarea></div></div>';
+  h+='<div class="mafoot"><button class="btn primary" id="ape_save">保存修改</button><button class="btn" id="ape_cancel">取消</button></div></div>';
+  var m=$('#modal');m.innerHTML=h;m.hidden=false;document.body.style.overflow='hidden';
+}
+function savePlanEditor(){
+  var box=$('#ape_box'); if(!box)return;
+  var role=box.getAttribute('data-role'),p=(state.cur.aiPlan||[]).filter(function(x){return x.role===role;})[0];if(!p)return;
+  p.gameId=$('#ape_game').value;p.reason=$('#ape_reason').value.trim();p.rule=$('#ape_rule').value.trim();p.selection=$('#ape_selection').value.trim();p.mode=$('#ape_mode').value.trim();p.participants=Math.max(1,+$('#ape_participants').value||1);p.awards=Math.max(0,+$('#ape_awards').value||0);p.notes=$('#ape_notes').value.trim();
+  p.groups=$('#ape_groups').value.split('\n').map(function(line){var a=line.split('｜');return {name:(a[0]||'未命名').trim(),people:Math.max(0,+a[1]||0),task:(a[2]||'按规则完成任务').trim()};}).filter(function(x){return x.people>0;});
+  save();openAiPlan();
+}
 function aiPlanGenerate(){
+  var req=$('#ap_req'); if(req){state.cur.aiPlanReq=req.value.trim();save();}
   var current=state.cur.aiPlan||[], pending=PLAN_ROLES.filter(function(r){var p=current.filter(function(x){return x.role===r.k;})[0];return !p||p.status==='rejected'||p.status==='pending';});
   if(!pending.length){planMsg={t:'3 个游戏都已接受，已全部写入流程。',c:'var(--green)'};openAiPlan();return;}
   var st=$('#ap_status'),go=$('#ap_go'); if(st)st.textContent='AI 策划中，可能需要几十秒…'; if(go)go.disabled=true;
@@ -1263,7 +1291,13 @@ $('#btnAiPlan').addEventListener('click',openAiPlan);
 $('#modal').addEventListener('click',function(e){
   var a=e.target.closest('[data-plan-accept]');if(a){acceptPlan(a.getAttribute('data-plan-accept'));return;}
   var r=e.target.closest('[data-plan-reject]');if(r){rejectPlan(r.getAttribute('data-plan-reject'));return;}
+  var edit=e.target.closest('[data-plan-edit]');if(edit){openPlanEditor(edit.getAttribute('data-plan-edit'));return;}
+  if(e.target.closest('#ape_save')){savePlanEditor();return;}
+  if(e.target.closest('#ape_cancel')){openAiPlan();return;}
   if(e.target.closest('#ap_go')){aiPlanGenerate();return;}
+});
+$('#modal').addEventListener('input',function(e){
+  if(e.target.id==='ap_req'){state.cur.aiPlanReq=e.target.value;save();}
 });
 
 /* ---------- AI 主持稿 ---------- */
