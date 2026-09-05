@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<meta name="scroll-restoration" content="manual">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5f5f7">
@@ -41,6 +42,8 @@ h1{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
 .tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:2px}
 .tabs button,.tabs .tab-link{border:0;background:transparent;font:inherit;font-size:15px;color:var(--text);padding:7px 18px;border-radius:8px;cursor:pointer;text-decoration:none;line-height:1.6}
 .tabs button.on{background:var(--card);font-weight:500;box-shadow:0 0 0 .5px rgba(0,0,0,.06)}
+.tabs button[data-view="plan"]{position:relative}
+.plan-badge{position:absolute;top:-7px;right:-5px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border:2px solid var(--card);border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:700;line-height:14px;box-shadow:0 1px 3px rgba(0,0,0,.16)}
 
 main.wrap{padding-top:32px;padding-bottom:80px}
 h2{font-size:19px;font-weight:600;letter-spacing:-.01em}
@@ -134,7 +137,7 @@ ul.plain li{margin-bottom:7px;font-size:16px;line-height:1.7}
 textarea.field{resize:vertical;min-height:64px;line-height:1.6}
 
 /* plan */
-.plan-head{margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;align-items:end}
+.plan-head{margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;align-items:end}.plan-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;flex:1;min-width:280px}
 .plan-head .full{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line)}
 .plan-body{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
 .plan-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
@@ -201,7 +204,7 @@ textarea.field{resize:vertical;min-height:64px;line-height:1.6}
   #syncDot{order:1;margin:0 4px 0 auto !important;align-self:center}
   .gearbtn{order:2}
   .tabs{order:3;flex-basis:100%;width:100%;margin-top:10px}
-  .tabs button,.tabs .tab-link{flex:1;padding:8px 4px;font-size:14px;white-space:nowrap}
+  .tabs button,.tabs .tab-link{flex:1;padding:8px 4px;font-size:14px;white-space:nowrap}.plan-badge{top:-5px;right:0}
   .gearbtn{width:36px;height:36px}
   /* layout */
   main.wrap{padding-top:18px;padding-bottom:calc(64px + env(safe-area-inset-bottom))}
@@ -231,7 +234,7 @@ textarea.field{resize:vertical;min-height:64px;line-height:1.6}
   .msection{margin-top:20px}
   .mtext,ol.steps li,ul.plain li{font-size:15px}
   /* plan */
-  .plan-head .full{flex-wrap:wrap}
+  .plan-head .full{flex-wrap:wrap}.plan-fields{grid-template-columns:1fr;min-width:0;width:100%}
   .plan-item{gap:10px}
   .pname{font-size:16px}
   .pidx{width:24px;height:24px;font-size:13px}
@@ -265,7 +268,7 @@ textarea.field{resize:vertical;min-height:64px;line-height:1.6}
     <div class="hdr-right">
       <nav class="tabs">
         <button data-view="lib" class="on">游戏库</button>
-        <button data-view="plan">本次生日会</button>
+        <button data-view="plan" id="planTab">本次生日会<span class="plan-badge" id="planBadge" hidden>0</span></button>
         <button data-view="log">往期记录</button>
         <a class="tab-link" href="https://p1tnczsuynd.feishu.cn/drive/folder/Q1HJfVsWulf5p2dbGxCcl9k9nDc" target="_blank" rel="noopener">生日会回顾</a>
       </nav>
@@ -301,7 +304,10 @@ textarea.field{resize:vertical;min-height:64px;line-height:1.6}
   <section id="view-plan" hidden>
     <div class="card plan-head">
       <div class="full">
-        <input class="field" id="planTitle" placeholder="生日会名称，例如：9 月产品部生日会">
+        <div class="plan-fields">
+          <input class="field" id="planTitle" placeholder="生日会名称">
+          <input class="field" id="planTheme" placeholder="生日会主题">
+        </div>
         <div class="tbtns">
           <button class="btn primary" id="btnSavePlan">保存生日会</button>
         </div>
@@ -368,7 +374,7 @@ var GAMES = [];
 var KEY = 'bgh_v1';
 var SYNC_DEFAULT = 'lyi-2026';  /* 内置默认同步码：新设备无需填写，打开即自动全量同步 */
 var AI_DEF = {url:'https://ai666.live/v1', key:'sk-FcfEByqfiggSPxsN9BfRnqNmrHCQpVn33kRf3zLkVC9ekjA6', model:'gpt-5.6-sol'};
-var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',who:'',date:'',people:'',items:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model}, sync:{code:SYNC_DEFAULT, lastSync:0}, _ts:0};
+var state = {stars:[], logs:[], user:[], edits:{}, hidden:[], cur:{id:'',name:'',theme:'',who:'',date:'',people:'',items:[]}, ai:{url:AI_DEF.url,key:AI_DEF.key,model:AI_DEF.model}, sync:{code:SYNC_DEFAULT, lastSync:0}, _ts:0};
 function ico(name){
   var p={search:'<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',filter:'<path d="M4 5h16M7 12h10M10 19h4"/>',plus:'<path d="M12 5v14M5 12h14"/>',spark:'<path d="m12 3 1.7 6.3L20 11l-6.3 1.7L12 19l-1.7-6.3L4 11l6.3-1.7L12 3Z"/>',eye:'<path d="M2.5 12s3.3-5 9.5-5 9.5 5 9.5 5-3.3 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/>',trash:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>',copy:'<rect x="8" y="8" width="11" height="12" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h8"/>',edit:'<path d="m4 16-.8 4.8L8 20l11-11a2.8 2.8 0 0 0-4-4L4 16Z"/>',save:'<path d="M5 4h12l3 3v13H5zM8 4v6h8V4M8 20v-6h8v6"/>',image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 3 3 2-2 6 5"/>',refresh:'<path d="M20 11a8 8 0 0 0-14.7-4L3 10M3 5v5h5M4 13a8 8 0 0 0 14.7 4L21 14m0 5v-5h-5"/>',arrowUp:'<path d="m6 14 6-6 6 6"/>',arrowDown:'<path d="m6 10 6 6 6-6"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>'};
   return '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">'+(p[name]||'')+'</svg>';
@@ -573,6 +579,7 @@ $('#grid').addEventListener('click', function(e){
 var currentGid=null;
 function openGame(id){
   var g=gid(id); if(!g) return;
+  window.scrollTo(0,0);
   currentGid=id;
   var lp=lastPlayed(g.id);
   var h='<div class="mbox">';
@@ -670,7 +677,14 @@ function togglePlan(id){
 }
 function itemName(it){ return it.type==='break'? '休息 / 自由交流' : (gid(it.gid)? gid(it.gid).name : '已删除'); }
 
+function updatePlanBadge(){
+  var badge=$('#planBadge'); if(!badge) return;
+  var count=(state.cur.items||[]).filter(function(it){ return it.type==='game'; }).length;
+  badge.textContent=count;
+  badge.hidden=count===0;
+}
 function renderPlan(){
+  updatePlanBadge();
   var items=state.cur.items;
   if(!items.length){
     $('#planList').innerHTML='<div class="empty">还没有游戏。去游戏库添加。</div>';
@@ -707,13 +721,12 @@ function renderProps(){
       t[k].q+=p.q;
     });
   });
-  var h='', tot=0, n=0;
+  var h='', n=0;
   Object.keys(buy).forEach(function(k){
-    var v=buy[k], sub=Math.round(v.q*v.p*100)/100; tot+=sub; n++;
-    h+='<div class="side-row"><span>'+esc(v.n)+'</span><span class="v">'+v.q+' '+esc(v.u)+' · ¥'+sub.toFixed(2)+'</span></div>';
+    var v=buy[k]; n++;
+    h+='<div class="side-row"><span>'+esc(v.n)+'</span><span class="v">'+v.q+' '+esc(v.u)+'</span></div>';
   });
-  if(!n) h+='<div class="empty">这个方案不需要采购任何东西</div>';
-  else h+='<div class="side-row"><span><b>预算合计</b></span><span class="v"><b>¥'+tot.toFixed(2)+'</b></span></div>';
+  if(!n) h+='<div class="empty">无需采购</div>';
 
   var ownKeys=Object.keys(own);
   if(ownKeys.length){
@@ -736,8 +749,8 @@ $('#planList').addEventListener('click', function(e){
     var c=state.cur.items; var t2=c[j]; c[j]=c[j+1]; c[j+1]=t2; save(); renderPlan(); return; }
   if((b=e.target.closest('[data-rm]'))){ state.cur.items.splice(+b.getAttribute('data-rm'),1); save(); renderPlan(); renderLib(); return; }
 });
-['planTitle','planDate','planPeople'].forEach(function(id){
-  var k={planTitle:'name',planDate:'date',planPeople:'people'}[id];
+['planTitle','planTheme','planDate','planPeople'].forEach(function(id){
+  var k={planTitle:'name',planTheme:'theme',planDate:'date',planPeople:'people'}[id];
   $('#'+id).addEventListener('input', function(e){ state.cur[k]=e.target.value; save(); });
 });
 
@@ -746,15 +759,16 @@ $('#btnSavePlan').addEventListener('click', function(){
   if(!state.cur.name){ state.cur.name=prompt('给这场生日会起个名字', '生日会 '+(state.logs.length+1)); if(!state.cur.name) return; $('#planTitle').value=state.cur.name; }
   if(!state.cur.id) state.cur.id='p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
   var gids=state.cur.items.filter(function(it){ return it.type==='game'; }).map(function(it){ return it.gid; });
-  var entry={pid:state.cur.id, name:state.cur.name, who:state.cur.who, date:state.cur.date||todayStr(), people:state.cur.people, gids:gids};
+  var entry={pid:state.cur.id, name:state.cur.name, theme:state.cur.theme, who:state.cur.who, date:state.cur.date||todayStr(), people:state.cur.people, gids:gids};
   var li=-1; state.logs.forEach(function(l,i){ if(l.pid===state.cur.id) li=i; });
   if(li>=0) state.logs[li]=entry; else state.logs.push(entry);
   // 保存后开启一场新的生日会草稿
-  state.cur={id:'',name:'',who:'',date:'',people:'',items:[]};
+  state.cur={id:'',name:'',theme:'',who:'',date:'',people:'',items:[]};
   save(); syncPlanInputs(); renderPlan(); renderLogQueryOpts(); renderLogQuery(); renderLogs(); renderStats(); renderLib();
 });
 function syncPlanInputs(){
   $('#planTitle').value=state.cur.name||'';
+  $('#planTheme').value=state.cur.theme||'';
   $('#planDate').value=state.cur.date||'';
   $('#planPeople').value=state.cur.people||'';
 }
@@ -778,6 +792,7 @@ function renderLogQuery(){
     else {
       h+='<div class="logtop"><span class="logdate">'+esc(l.date||'')+'</span>';
       h+='<span class="logocc">'+esc(l.name||l.occ||'未命名生日会')+'</span>';
+      if(l.theme) h+='<span class="logocc">'+esc(l.theme)+'</span>';
       if(l.who) h+='<span class="logocc">'+esc(l.who)+'</span>';
       if(l.people) h+='<span class="logocc">'+esc(l.people)+' 人</span></div>';
       var names=(l.gids||[]).map(function(id){ var g=gid(id); return g? g.name : ''; }).filter(Boolean);
@@ -810,6 +825,7 @@ function renderLogs(){
     var names=(l.gids||[]).map(function(id){ var g=gid(id); return g? g.name : ''; }).filter(Boolean);
     h+='<div class="logitem"><div class="logtop"><span class="logdate">'+esc(l.date||'')+'</span>';
     h+='<span class="logocc">'+esc(l.name||'未命名生日会')+'</span>';
+    if(l.theme) h+='<span class="logocc">'+esc(l.theme)+'</span>';
     if(l.people) h+='<span class="logocc">'+esc(l.people)+' 人</span>';
     h+='<button class="btn sm" data-dellog="'+idx+'">删除</button></div>';
     h+='<div class="loggames">'+esc(names.join('、'))+'</div>';
@@ -1249,7 +1265,7 @@ function scheduleSync(){
 function applyRemote(payload){
   if(!payload || (payload._ts||0) <= (state._ts||0)) return false;
   ['stars','logs','user','edits','hidden'].forEach(function(k){ if(payload[k]!==undefined) state[k]=payload[k]; });
-  if(payload.cur) state.cur=Object.assign({id:'',name:'',who:'',date:'',people:'',items:[]}, payload.cur);
+  if(payload.cur) state.cur=Object.assign({id:'',name:'',theme:'',who:'',date:'',people:'',items:[]}, payload.cur);
   if(payload.ai) state.ai=Object.assign({}, state.ai, payload.ai);
   state._ts=payload._ts||Date.now(); state.sync.lastSync=Date.now();
   rawSave(); syncPlanInputs(); refreshAll();
@@ -1301,6 +1317,8 @@ document.querySelector('.tabs').addEventListener('click', function(e){
 });
 
 /* ---------- 启动 ---------- */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+window.scrollTo(0,0);
 load();
 syncPlanInputs();
 renderLogQueryOpts();
