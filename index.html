@@ -44,6 +44,7 @@ h1{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
 .tabs button.on{background:var(--card);font-weight:500;box-shadow:0 0 0 .5px rgba(0,0,0,.06)}
 .tabs button[data-view="plan"]{position:relative}
 .plan-badge{position:absolute;top:-7px;right:-5px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border:2px solid var(--card);border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:700;line-height:14px;box-shadow:0 1px 3px rgba(0,0,0,.16)}
+.plan-badge[hidden]{display:none!important}
 
 main.wrap{padding-top:32px;padding-bottom:80px}
 h2{font-size:19px;font-weight:600;letter-spacing:-.01em}
@@ -591,16 +592,11 @@ function openGame(id){
   h+='<div class="msection"><h3>道具</h3>';
   if(!g.props.length){ h+='<div class="mtext" style="color:var(--green)">无需任何道具</div>'; }
   else{
-    h+='<table class="ptable"><tr><th>名称</th><th style="text-align:right">数量</th><th style="text-align:right">单价</th><th style="text-align:right">小计</th></tr>';
-    var tot=0;
+    h+='<table class="ptable"><tr><th>名称</th><th style="text-align:right">数量</th></tr>';
     g.props.forEach(function(p){
-      var sub=p.buy? Math.round(p.q*p.p*100)/100 : 0; tot+=sub;
       h+='<tr><td>'+esc(p.n)+(p.buy?' <span class="tag buy">需采购</span>':' <span class="tag none">办公室现成</span>')+'</td>'+
-         '<td class="num">'+p.q+' '+esc(p.u)+'</td>'+
-         '<td class="num">'+(p.buy?'¥'+p.p:'—')+'</td>'+
-         '<td class="num">'+(p.buy?'¥'+sub.toFixed(2):'—')+'</td></tr>';
+         '<td class="num">'+p.q+' '+esc(p.u)+'</td></tr>';
     });
-    h+='<tr><td><b>合计</b></td><td class="num"></td><td class="num"></td><td class="num"><b>¥'+tot.toFixed(2)+'</b></td></tr>';
     h+='</table>';
   }
   h+='</div>';
@@ -897,7 +893,7 @@ function openEditor(id, preset){
   h+='<div class="msection"><h3>变体玩法</h3><textarea class="field" id="e_variants" rows="3" placeholder="一行一条">'+esc((v.variants||[]).join('\n'))+'</textarea></div>';
   h+='<div class="msection"><h3>踩坑提醒</h3><textarea class="field" id="e_pits" rows="3" placeholder="一行一条">'+esc((v.pits||[]).join('\n'))+'</textarea></div>';
   h+='<div class="msection"><h3>道具清单</h3><div id="e_props"></div><button class="btn sm" id="e_addprop" style="margin-top:8px">添加一项</button>';
-  h+='<div class="ehint">勾了「需采购」的会进道具采购清单并计入预算；办公室现成的只做提醒。</div></div>';
+  h+='<div class="ehint">勾了「需采购」的会进道具采购清单；办公室现成的只做提醒。</div></div>';
   h+='<div class="mafoot"><button class="btn primary" id="e_save">保存</button><button class="btn" data-eclose>取消</button>';
   if(g) h+='<button class="btn" id="e_del">删除这个游戏</button>';
   h+='</div></div>';
@@ -912,7 +908,6 @@ function renderEditorProps(){
     h+='<input class="field pn" type="text" placeholder="名称" value="'+esc(p.n)+'" data-pi="'+i+'" data-pk="n">';
     h+='<input class="field" type="number" min="0" value="'+(+p.q||0)+'" data-pi="'+i+'" data-pk="q">';
     h+='<input class="field pu" type="text" value="'+esc(p.u)+'" data-pi="'+i+'" data-pk="u">';
-    h+='<input class="field" type="number" min="0" step="0.1" value="'+(+p.p||0)+'" data-pi="'+i+'" data-pk="p">';
     h+='<label style="font-size:14px;color:var(--muted);white-space:nowrap"><input type="checkbox" data-pi="'+i+'" data-pk="buy"'+(p.buy?' checked':'')+'>需采购</label>';
     h+='<button class="del" data-premove="'+i+'">&times;</button>';
     h+='</div>';
@@ -989,7 +984,6 @@ $('#modal').addEventListener('input', function(e){
   var i=+pi, k=t.getAttribute('data-pk');
   if(k==='buy') editProps[i].buy=t.checked;
   else if(k==='q') editProps[i].q=Math.max(0,+t.value||0);
-  else if(k==='p') editProps[i].p=Math.max(0,+t.value||0);
   else editProps[i][k]=t.value;
 });
 $('#modal').addEventListener('click', function(e){
