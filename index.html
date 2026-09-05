@@ -1025,11 +1025,11 @@ function aiErrText(err){
   return m;
 }
 function aiChat(messages){
-  return fetch(aiBase(), {
+  return fetchTimeout(aiBase(), {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.ai.key},
     body: JSON.stringify({model:state.ai.model, messages:messages})
-  }).then(function(res){
+  }, 60000).then(function(res){
     if(!res.ok){
       return res.text().catch(function(){ return ''; }).then(function(t){
         throw new Error('HTTP '+res.status+(t?' · '+t.slice(0,160):''));
@@ -1169,8 +1169,19 @@ function normalizeAI(o){
   if(g.max<g.min) g.max=g.min;
   return g;
 }
+function fetchTimeout(url, opts, ms){
+  opts=opts||{};
+  var ctl=typeof AbortController!=='undefined'?new AbortController():null;
+  if(ctl) opts.signal=ctl.signal;
+  var timer=setTimeout(function(){ if(ctl) ctl.abort(); }, ms||60000);
+  return fetch(url, opts).then(function(r){ clearTimeout(timer); return r; }, function(err){
+    clearTimeout(timer);
+    if(err && err.name==='AbortError') throw new Error('请求超时，请检查 VPN 或稍后重试');
+    throw err;
+  });
+}
 function fetchXHS(url){
-  return fetch('https://r.jina.ai/'+url).then(function(r){
+  return fetchTimeout('https://r.jina.ai/'+url, {}, 20000).then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.text();
   });
