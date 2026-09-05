@@ -1279,7 +1279,7 @@ function planPrompt(pending){
     +'参与人数原则：第一个 warm 尽量让更多人参与；第二个 team 按游戏规则正常安排，不强求每个人参加；第三个 fun 尽量让更多人参与，但允许观摩、计分或轮换。绝对不能为了凑人数简单平均分组。\n'
     +'已经接受的游戏不能重复：'+(existing.join(',')||'无')+'。\n游戏库 JSON：'+JSON.stringify(games)+'\n'
     +'规则摘要只写一句话，不能复述 steps，也不能把同一内容重复写到各小组。\n'
-    +'请严格只返回 JSON，不要 markdown：{"plans":[{"role":"warm/team/fun","gameId":"游戏库中的id","reason":"不超过50字的匹配理由","rule":"只写一次的简明游戏规则，80字内","selection":"具体选人建议，可包含性别比例、衣服颜色、座位区域、随机/自愿等，不要歧视或强制","arrangement":{"mode":"具体参与方式","participants":数字,"groups":[{"name":"A组或主持人指定","people":数字,"task":"这一组具体怎么做"}],"awards":数字,"notes":"未参与人员如何观摩/计分/轮换"}}]}。每个 role 只能一个，gameId 必须来自游戏库。\n'
+    +'请严格只返回 JSON，不要 markdown：{"plans":[{"role":"warm/team/fun","gameId":"游戏库中的id","reason":"不超过50字的匹配理由","rule":"只写一次的简明游戏规则，80字内","selection":"具体选人建议，可包含性别比例、衣服颜色、座位区域、随机/自愿等，不要歧视或强制","arrangement":{"mode":"具体参与方式","participants":数字,"groups":[{"name":"A组或主持人指定","people":数字,"task":"这一组具体怎么做"}],"awards":数字,"reward":"奖励具体内容","notes":"未参与人员如何观摩/计分/轮换"}}]}。每个 role 只能一个，gameId 必须来自游戏库。\n'
     +'你必须先读懂该游戏的 steps、desc、props 和 variants，再决定 rule、selection、participants、groups、每组人数、每组任务、奖励份数。groups 中的人数总和必须等于 participants；如果游戏不是分组对抗，可以只有一个参与队伍或按规则轮换。奖励份数必须符合游戏规则，不要默认每组一份。\n'
     +'匹配原则：warm 优先破冰暖场且低门槛；team 优先协作挑战或分组对抗；fun 优先爆笑整蛊且轻松。相同的规则或任务只概括一次，禁止在每个小组重复输出。';
 }
@@ -1297,6 +1297,7 @@ function planCard(p){
   h+='<div class="ai-plan-meta"><b>游戏规则</b>：'+esc(p.rule||'按游戏规则进行')+'</div>';
   h+='<div class="ai-plan-meta"><b>选人建议</b>：'+esc(p.selection||'由主持人按上述参与方式现场选择人员')+'</div>';
   h+='<div class="ai-plan-meta"><b>分组安排</b>：'+esc(renderPlanGroups(p))+'</div>';
+  h+='<div class="ai-plan-meta"><b>奖励内容</b>：'+esc(p.reward||'未设置')+'</div>';
   h+='<div class="ai-plan-actions"><button class="btn'+(p.status==='accepted'?' primary':'')+'" data-plan-toggle="'+esc(p.role)+'">'+(p.status==='accepted'?'改为不接受':'接受')+'</button><button class="btn'+(p.status==='rejected'?' primary':'')+'" data-plan-reject="'+esc(p.role)+'">'+(p.status==='rejected'?'改为接受':'不接受')+'</button></div>';
   h+='</div>'; return h;
 }
@@ -1322,6 +1323,7 @@ function openPlanEditor(role){
   h+='<div class="efield"><label>参与人数</label><input class="field" id="ape_participants" type="number" min="1" value="'+(+p.participants||planPeople())+'"></div>';
   h+='<div class="efield"><label>分组安排（每行：组名｜人数｜任务）</label><textarea class="field" id="ape_groups" rows="5">'+esc((p.groups||[]).map(function(x){return (x.name||'')+'｜'+(+x.people||0)+'｜'+(x.task||'');}).join('\n'))+'</textarea></div>';
   h+='<div class="efield"><label>奖励份数</label><input class="field" id="ape_awards" type="number" min="0" value="'+(+p.awards||0)+'"></div>';
+  h+='<div class="efield"><label>奖励内容</label><input class="field" id="ape_reward" value="'+esc(p.reward||'')+'" placeholder="例如：小礼品、饮料、积分"></div>';
   h+='<div class="efield"><label>其他人员安排</label><textarea class="field" id="ape_notes" rows="2">'+esc(p.notes||'')+'</textarea></div></div>';
   h+='<div class="mafoot"><button class="btn primary" id="ape_save">保存修改</button><button class="btn" id="ape_cancel">取消</button></div></div>';
   var m=$('#modal');m.innerHTML=h;m.hidden=false;document.body.style.overflow='hidden';
@@ -1329,7 +1331,7 @@ function openPlanEditor(role){
 function savePlanEditor(){
   var box=$('#ape_box'); if(!box)return;
   var role=box.getAttribute('data-role'),p=(state.cur.aiPlan||[]).filter(function(x){return x.role===role;})[0];if(!p)return;
-  p.gameId=$('#ape_game').value;p.reason=$('#ape_reason').value.trim();p.rule=$('#ape_rule').value.trim();p.selection=$('#ape_selection').value.trim();p.mode=$('#ape_mode').value.trim();p.participants=Math.max(1,+$('#ape_participants').value||1);p.awards=Math.max(0,+$('#ape_awards').value||0);p.notes=$('#ape_notes').value.trim();
+  p.gameId=$('#ape_game').value;p.reason=$('#ape_reason').value.trim();p.rule=$('#ape_rule').value.trim();p.selection=$('#ape_selection').value.trim();p.mode=$('#ape_mode').value.trim();p.participants=Math.max(1,+$('#ape_participants').value||1);p.awards=Math.max(0,+$('#ape_awards').value||0);p.reward=$('#ape_reward').value.trim();p.notes=$('#ape_notes').value.trim();
   p.groups=$('#ape_groups').value.split('\n').map(function(line){var a=line.split('｜');return {name:(a[0]||'未命名').trim(),people:Math.max(0,+a[1]||0),task:(a[2]||'按规则完成任务').trim()};}).filter(function(x){return x.people>0;});
   save();openAiPlan();
 }
@@ -1626,7 +1628,7 @@ function scheduleSync(){
 function applyRemote(payload){
   if(!payload || (payload._ts||0) <= (state._ts||0)) return false;
   ['stars','logs','user','edits','hidden'].forEach(function(k){ if(payload[k]!==undefined) state[k]=payload[k]; });
-  if(payload.cur) state.cur=Object.assign({id:'',name:'',theme:'',who:'',date:'',people:'',items:[],scriptReq:'',script:'',aiPlan:[]}, payload.cur);
+  if(payload.cur) state.cur=Object.assign({id:'',name:'',theme:'',who:'',date:'',people:'',items:[],scriptReq:'',script:'',aiPlanReq:'',aiPlan:[],archived:false}, payload.cur);
   if(payload.ai) state.ai=Object.assign({}, state.ai, payload.ai);
   state._ts=payload._ts||Date.now(); state.sync.lastSync=Date.now();
   rawSave(); syncPlanInputs(); refreshAll();
